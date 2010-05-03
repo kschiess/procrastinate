@@ -3,7 +3,6 @@ require 'spec_helper'
 require 'tempfile'
 
 describe 'Basic operations' do
-  
   class Worker
     def write_to_file(file)
       file.write "success"
@@ -22,9 +21,10 @@ describe 'Basic operations' do
     attr_reader :file
     before(:each) do
       @file = Tempfile.new('basic_op')
-      file.unlink
-
+      
       proxy.write_to_file(file)
+
+      scheduler.shutdown
     end
     
     it "should append 'success' to the file" do
