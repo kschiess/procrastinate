@@ -2,10 +2,15 @@ require 'spec_helper'
 
 require 'tempfile'
 
-describe 'Basic operations' do
+describe 'Basic operations:' do
   class Worker
     def write_to_file(file)
       file.write "success"
+      file.close
+      p :write_to_file_end
+    end
+    def bad_exit
+      exit 0
     end
   end
   
@@ -17,11 +22,10 @@ describe 'Basic operations' do
     @proxy = scheduler.start(Worker)
   end
 
-  describe "worker writing to a temporary file (orderly shutdown)" do
+  describe "Worker writing to a temporary file (orderly shutdown)" do
     attr_reader :file
     before(:each) do
       @file = Tempfile.new('basic_op')
-      
       proxy.write_to_file(file)
       
       scheduler.shutdown
@@ -32,7 +36,14 @@ describe 'Basic operations' do
       file.read.should == 'success'
     end 
   end
-  describe "regression: join shortly after queuing 2 jobs" do
-    it "should loop forever" 
-  end
+  # describe "Worker that exits its process" do
+  #   before(:each) do
+  #     proxy.bad_exit
+  #     scheduler.shutdown
+  #   end
+  #   
+  #   it "should not have exited the scheduler (runs in its own process)" do
+  #   end 
+  # end
+  
 end
