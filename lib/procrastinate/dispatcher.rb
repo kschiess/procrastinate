@@ -9,7 +9,6 @@ class Procrastinate::Dispatcher
     @thread = Thread.start do
       loop do
         work_item = queue.pop
-        
         break if work_item == :shutdown_request
         
         worker = worker_klass.new
@@ -28,11 +27,8 @@ class Procrastinate::Dispatcher
     @worker_klass = worker_klass
   end
 
-  def request_shutdown
+  def shutdown
     queue.push(:shutdown_request)
-  end
-  
-  def join
     thread.join
   end
 end

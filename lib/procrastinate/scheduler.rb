@@ -14,11 +14,6 @@ class Procrastinate::Scheduler
   end
   
   def shutdown
-    dispatcher.request_shutdown
-    dispatcher.join
-  end
-  
-  def join
-    dispatcher.join
+    dispatcher.shutdown
   end
 end

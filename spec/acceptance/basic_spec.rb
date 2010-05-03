@@ -17,13 +17,13 @@ describe 'Basic operations' do
     @proxy = scheduler.start(Worker)
   end
 
-  describe "worker writing to a temporary file" do
+  describe "worker writing to a temporary file (orderly shutdown)" do
     attr_reader :file
     before(:each) do
       @file = Tempfile.new('basic_op')
       
       proxy.write_to_file(file)
-
+      
       scheduler.shutdown
     end
     
@@ -31,5 +31,8 @@ describe 'Basic operations' do
       file.rewind
       file.read.should == 'success'
     end 
+  end
+  describe "regression: join shortly after queuing 2 jobs" do
+    it "should loop forever" 
   end
 end
