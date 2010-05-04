@@ -27,19 +27,21 @@ describe Procrastinate::Dispatcher do
     end 
     context "that expects completion to be called" do
       before(:each) do
-        @spawn_called = false
+        @completed = false
         
-        button = flexmock().should_receive(:push).at_least.once.mock
         strategy.should_receive(:spawn_new_workers).and_return do |spawner|
-          spawner.spawn([:message, [1,2,3], nil]) { button.push }
-          @spawn_called = true
+          spawner.spawn([:message, [1,2,3], nil]) { @completed = true }
         end
+      end
+      after(:each) do
+        dispatcher.stop
       end
 
       it "should start the task and call its callback" do
-        dispatcher.wakeup
-        sleep 0.01 until @spawn_called
-        dispatcher.stop
+        timeout(1) do
+          dispatcher.wakeup
+          sleep 0.01 until @completed
+        end
       end
     end
   end
