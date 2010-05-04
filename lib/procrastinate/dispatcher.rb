@@ -4,9 +4,6 @@
 # outside is #wakeup. 
 #
 class Procrastinate::Dispatcher
-  # The class that needs to be instantiated and sent the work messages.
-  attr_reader :worker_klass
-  
   # The dispatcher runs in its own thread, which sleeps most of the time. 
   attr_reader :thread
   
@@ -23,8 +20,7 @@ class Procrastinate::Dispatcher
   #
   attr_reader :strategy
   
-  def initialize(strategy, worker_klass)
-    @worker_klass = worker_klass
+  def initialize(strategy)
     @strategy = strategy
 
     @control_pipe = IO.pipe
@@ -32,8 +28,8 @@ class Procrastinate::Dispatcher
     @stop_requested = false
   end
 
-  def self.start(strategy, worker_klass)
-    new(strategy, worker_klass).tap do |dispatcher| 
+  def self.start(strategy)
+    new(strategy).tap do |dispatcher| 
       dispatcher.start
     end
   end
@@ -121,21 +117,19 @@ class Procrastinate::Dispatcher
     # Ignored: Child status has been reaped by someone else
   end
   
-  # Spawns a process to work on +work_item+. If a block is given, it is called
+  # Spawns a process to work on +task+. If a block is given, it is called
   # when the task completes.
   #
   # Example: 
   # 
   #   spawn(wi) { puts "Task is complete" }
   #
-  def spawn(work_item, &completion_handler)
+  def spawn(task, &completion_handler)
     pid = fork do
       cleanup
 
-      worker = worker_klass.new
-      message, arguments, block = work_item
-      worker.send(message, *arguments, &block)
-      
+      task.run
+
       exit! # this seems to be needed to avoid rspecs cleanup tasks
     end
     

@@ -6,22 +6,19 @@ class Procrastinate::Scheduler
     @shutdown_requested = false
   end
   
-  def start(worker_klass)
+  def start
     @strategy   = Procrastinate::DispatchStrategy::Simple.new
-    @dispatcher = Procrastinate::Dispatcher.start(strategy, worker_klass)
-    
-    create_proxy(worker_klass)
+    @dispatcher = Procrastinate::Dispatcher.start(strategy)
   end
   
   def create_proxy(worker_klass)
     return Procrastinate::Proxy.new(worker_klass, self)
   end
-  
-  # Called by the proxy to schedule work. A work item is a triple of 
-  # <method_name, arguments, block>. 
+    
+  # Called by the proxy to schedule work.
   #
-  def schedule(work_item)
-    strategy.schedule(work_item)
+  def schedule(task)
+    strategy.schedule(task)
     dispatcher.wakeup
   end
   

@@ -17,8 +17,9 @@ describe 'Basic operations:' do
   attr_reader :scheduler
   before(:each) do
     @scheduler = Procrastinate::Scheduler.new
+    scheduler.start
     
-    @proxy = scheduler.start(Worker)
+    @proxy = scheduler.create_proxy(Worker)
   end
 
   describe "Worker writing to a temporary file (orderly shutdown)" do
