@@ -25,8 +25,9 @@ class Procrastinate::Dispatcher
   
   def initialize(strategy, worker_klass)
     @worker_klass = worker_klass
-    @control_pipe = IO.pipe
     @strategy = strategy
+
+    @control_pipe = IO.pipe
     @handlers = {}
     @stop_requested = false
   end
@@ -67,6 +68,9 @@ class Procrastinate::Dispatcher
   
   def start_thread
     @thread = Thread.new do
+      Thread.current.abort_on_exception = true
+      
+      # Loop until someone requests a shutdown.
       loop do
         wait_for_event
         reap_workers
@@ -78,8 +82,6 @@ class Procrastinate::Dispatcher
       
       wait_for_all_childs
     end
-    
-    thread.abort_on_exception = true
   end
   
   def wait_for_event
