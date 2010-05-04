@@ -2,13 +2,14 @@
 require 'blankslate'
 
 class Procrastinate::Proxy < BlankSlate
-  def initialize(methods, scheduler)
-    @methods = methods
+  def initialize(klass, scheduler)
+    # The .map is needed for ruby 1.8
+    @valid_methods = klass.instance_methods.map { |m| m.to_sym }
     @scheduler = scheduler
   end
   
   def respond_to?(name)
-    @methods.include?(name)
+    @valid_methods.include?(name)
   end
   
   def method_missing(name, *args, &block)

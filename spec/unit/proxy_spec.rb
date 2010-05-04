@@ -9,11 +9,11 @@ describe Procrastinate::Proxy do
   
   attr_reader :proxy
   attr_reader :klass
-  attr_reader :queue
+  attr_reader :scheduler
   before(:each) do
     @klass = Worker
-    @queue = flexmock(:queue)
-    @proxy = Procrastinate::Proxy.new(klass, queue)
+    @scheduler = flexmock(:scheduler)
+    @proxy = Procrastinate::Proxy.new(klass, scheduler)
   end
   
   describe "<- #respond_to?" do
@@ -26,7 +26,7 @@ describe Procrastinate::Proxy do
   end
   describe "missing method" do
     it "should enqueue work" do
-      queue.should_receive(:push).with([:do_work, [1,2,3], nil]).once
+      scheduler.should_receive(:schedule).with([:do_work, [1,2,3], nil]).once
       
       proxy.do_work(1,2,3)
     end 

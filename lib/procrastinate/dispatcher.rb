@@ -45,9 +45,16 @@ class Procrastinate::Dispatcher
   # dispatcher. 
   #
   def stop
+    request_stop
+    join
+  end
+
+  # Called from the dispatcher thread, will cause the dispatcher to wait on
+  # all running tasks and then stop dispatching. 
+  #
+  def request_stop
     @stop_requested = true
     wakeup
-    @thread.join
   end
   
   def stop_requested?
@@ -88,6 +95,13 @@ class Procrastinate::Dispatcher
   #
   def wakeup
     control_pipe.last.write '.'
+  end
+  
+  # Waits until the dispatcher completes its work. If you don't initiate a
+  # shutdown, this may be forever.
+  #
+  def join
+    @thread.join
   end
   
   # Calls completion handlers for all the childs that have now exited.

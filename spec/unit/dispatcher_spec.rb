@@ -39,7 +39,6 @@ describe Procrastinate::Dispatcher do
       it "should start the task and call its callback" do
         dispatcher.wakeup
         sleep 0.01 until @spawn_called
-        dispatcher.wakeup
         dispatcher.stop
       end
     end

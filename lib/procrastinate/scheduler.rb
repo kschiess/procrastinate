@@ -1,33 +1,32 @@
-require 'thread'
-
 class Procrastinate::Scheduler
-  attr_reader :work_queue
   attr_reader :dispatcher
   attr_reader :strategy
   
   def initialize
-    @work_queue = Queue.new
+    @shutdown_requested = false
   end
   
   def start(worker_klass)
-    @strategy   = Procrastinate::DispatchStrategy::Simple.new(work_queue)
+    @strategy   = Procrastinate::DispatchStrategy::Simple.new
     @dispatcher = Procrastinate::Dispatcher.start(strategy, worker_klass)
-
-    # The .map is needed for ruby 1.8
-    valid_methods = worker_klass.instance_methods.map { |m| m.to_sym }
-    return Procrastinate::Proxy.new(valid_methods, self)
+    
+    create_proxy(worker_klass)
+  end
+  
+  def create_proxy(worker_klass)
+    return Procrastinate::Proxy.new(worker_klass, self)
   end
   
   # Called by the proxy to schedule work. A work item is a triple of 
   # <method_name, arguments, block>. 
   #
   def schedule(work_item)
-    work_queue.push work_item
-    
+    strategy.schedule(work_item)
     dispatcher.wakeup
   end
   
   def shutdown
-    dispatcher.shutdown
+    strategy.shutdown
+    dispatcher.join
   end
 end
