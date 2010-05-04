@@ -1,2 +1,6 @@
 
+runs with
+Ruby 1.8
+Ruby 1.9 edge or a version that includes this patch: http://redmine.ruby-lang.org/issues/show/1525
+
 gem dep: blankslate

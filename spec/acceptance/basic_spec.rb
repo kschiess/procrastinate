@@ -7,7 +7,6 @@ describe 'Basic operations:' do
     def write_to_file(file)
       file.write "success"
       file.close
-      p :write_to_file_end
     end
     def bad_exit
       exit 0
