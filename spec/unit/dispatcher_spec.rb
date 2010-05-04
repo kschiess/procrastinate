@@ -3,22 +3,40 @@ require 'spec_helper'
 require 'thread'
 
 describe Procrastinate::Dispatcher do
-  attr_reader :queue, :worker_klass
-  before(:each) do
-    @queue = Queue.new
-  end
-  
-  describe ".start" do
-    it "should return a Dispatcher" do
-      Procrastinate::Dispatcher.
-        start(queue, worker_klass).
-        should be_an_instance_of(Procrastinate::Dispatcher)
+  describe "with a simple strategy" do
+    attr_reader :strategy
+    attr_reader :dispatcher
+    before(:each) do
+      # Strategy stubs
+      @strategy = flexmock(:strategy)
+      strategy.should_receive(:spawn_new_workers).by_default
+      
+      # Worker class expectation
+      worker_klass = Class.new
+      worker_klass.instance_eval do
+        define_method(:message) { |a,b,c| puts "holler from #{Process.pid}" }
+      end
+      
+      @dispatcher = Procrastinate::Dispatcher.start(strategy, worker_klass)
     end
-  end
-  describe "<- #join" do
     
-  end
-  describe "<- #request_shutdown" do
-    
+    it "should stop the thread when all running tasks complete" do
+      dispatcher.stop
+      
+      dispatcher.thread.should_not be_alive
+    end 
+    context "that expects completion to be called" do
+      before(:each) do
+        button = flexmock().should_receive(:push).once.mock
+        strategy.should_receive(:spawn_new_workers).and_return do |spawner|
+          spawner.spawn([:message, [1,2,3], nil]) { button.push }
+        end
+      end
+
+      it "should start the task and call its callback" do
+        dispatcher.wakeup
+        dispatcher.stop
+      end
+    end
   end
 end

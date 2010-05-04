@@ -1,4 +1,8 @@
 
+# Dispatches and handles tasks and task completion. Only low level unixy
+# manipulation here, no strategy. The only method you should call from the
+# outside is #wakeup. 
+#
 class Procrastinate::Dispatcher
   # The class that needs to be instantiated and sent the work messages.
   attr_reader :worker_klass
@@ -14,11 +18,17 @@ class Procrastinate::Dispatcher
   # in the dispatcher/strategy's thread.
   attr_reader :handlers
   
+  # The strategy for dispatching new tasks. Makes all the decisions about
+  # when to launch what process.
+  #
+  attr_reader :strategy
+  
   def initialize(strategy, worker_klass)
     @worker_klass = worker_klass
     @control_pipe = IO.pipe
     @strategy = strategy
     @handlers = {}
+    @stop_requested = false
   end
 
   def self.start(strategy, worker_klass)
@@ -31,8 +41,21 @@ class Procrastinate::Dispatcher
     start_thread
   end
   
+  # Called from anywhere, will complete all running tasks and stop the
+  # dispatcher. 
+  #
+  def stop
+    @stop_requested = true
+    wakeup
+    @thread.join
+  end
+  
+  def stop_requested?
+    @stop_requested
+  end
+  
   def register_signals
-    trap('CHLD') { awaken_dispatcher }
+    trap('CHLD') { wakeup }
   end
   
   def start_thread
@@ -41,8 +64,12 @@ class Procrastinate::Dispatcher
         wait_for_event
         reap_workers
         
+        break if stop_requested?
+
         strategy.spawn_new_workers(self)
       end
+      
+      wait_for_all_childs
     end
     
     thread.abort_on_exception = true
@@ -88,12 +115,12 @@ class Procrastinate::Dispatcher
   def spawn(work_item, &completion_handler)
     pid = fork do
       cleanup
-      
+
       worker = worker_klass.new
       message, arguments, block = work_item
       worker.send(message, *arguments, &block)
       
-      exit 0
+      exit! # this seems to be needed to avoid rspecs cleanup tasks
     end
     
     handlers[pid] = completion_handler
@@ -107,7 +134,12 @@ class Procrastinate::Dispatcher
     control_pipe.each { |io| io.close }
   end
 
-  def shutdown
-    # TODO
+  # Waits for all childs to complete. 
+  #
+  def wait_for_all_childs
+    until handlers.empty?
+      sleep 0.1
+      reap_workers
+    end
   end
 end
