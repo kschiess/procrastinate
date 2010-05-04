@@ -7,7 +7,7 @@ describe Procrastinate::Scheduler do
     @scheduler = Procrastinate::Scheduler.new
   end
   
-  describe "<- #start" do
+  describe "<- #create_proxy" do
     class Worker
       def do_stuff
       end
@@ -16,7 +16,7 @@ describe Procrastinate::Scheduler do
     context "return value" do
       attr_reader :return_value
       before(:each) do
-        @return_value = scheduler.start(Worker)
+        @return_value = scheduler.create_proxy(Worker)
       end
 
       it "should be a proxy for worker klass" do

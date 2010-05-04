@@ -26,7 +26,10 @@ describe Procrastinate::Proxy do
   end
   describe "missing method" do
     it "should enqueue work" do
-      scheduler.should_receive(:schedule).with([:do_work, [1,2,3], nil]).once
+      scheduler.
+        should_receive(:schedule).
+        with(Procrastinate::Task::MethodCall).
+        once
       
       proxy.do_work(1,2,3)
     end 
