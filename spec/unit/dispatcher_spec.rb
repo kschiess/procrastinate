@@ -11,13 +11,7 @@ describe Procrastinate::Dispatcher do
       @strategy = flexmock(:strategy)
       strategy.should_receive(:spawn_new_workers).by_default
       
-      # Worker class expectation
-      worker_klass = Class.new
-      worker_klass.instance_eval do
-        define_method(:message) { |a,b,c|  }
-      end
-      
-      @dispatcher = Procrastinate::Dispatcher.start(strategy, worker_klass)
+      @dispatcher = Procrastinate::Dispatcher.start(strategy)
     end
     
     it "should stop the thread when all running tasks complete" do
@@ -28,9 +22,9 @@ describe Procrastinate::Dispatcher do
     context "that expects completion to be called" do
       before(:each) do
         @completed = false
-        
+                
         strategy.should_receive(:spawn_new_workers).and_return do |spawner|
-          spawner.spawn([:message, [1,2,3], nil]) { @completed = true }
+          spawner.spawn(flexmock(:task, :run => nil)) { @completed = true }
         end
       end
       after(:each) do
