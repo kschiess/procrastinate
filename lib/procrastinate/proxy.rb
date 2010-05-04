@@ -1,21 +1,19 @@
 
 require 'blankslate'
 
-class Procrastinate::Proxy
-  def initialize(klass, work_queue)
-    @klass = klass
-    @work_queue = work_queue
+class Procrastinate::Proxy < BlankSlate
+  def initialize(methods, scheduler)
+    @methods = methods
+    @scheduler = scheduler
   end
   
   def respond_to?(name)
-    @klass.instance_methods.
-      map { |method| method.to_sym }.     # needed in Ruby 1.8
-      include?(name)
+    @methods.include?(name)
   end
   
   def method_missing(name, *args, &block)
     if respond_to? name
-      @work_queue.push [name, args, block]
+      @scheduler.schedule [name, args, block]
     else
       super
     end
