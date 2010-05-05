@@ -18,7 +18,9 @@ describe "Throttled strategy (:limit => 4) when given 8 tasks" do
   attr_reader :trigger_write
   attr_reader :scheduler
   before(:each) do
-    @scheduler = Procrastinate::Scheduler.start 
+    @scheduler = Procrastinate::Scheduler.start(
+      Procrastinate::DispatchStrategy::Throttled.new(4)) 
+      
     @log_read, @log_write = IO.pipe
     trigger_read, @trigger_write = IO.pipe
 

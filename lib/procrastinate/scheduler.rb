@@ -7,12 +7,12 @@ class Procrastinate::Scheduler
   end
   
   # Start a new scheduler
-  def self.start
-    new.start
+  def self.start(strategy=nil)
+    new.start(strategy)
   end
-  def start
-    @strategy   = Procrastinate::DispatchStrategy::Simple.new
-    @dispatcher = Procrastinate::Dispatcher.start(strategy)
+  def start(strategy=nil)
+    @strategy   = strategy || Procrastinate::DispatchStrategy::Simple.new
+    @dispatcher = Procrastinate::Dispatcher.start(@strategy)
     
     self
   end
