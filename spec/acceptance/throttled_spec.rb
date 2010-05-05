@@ -54,10 +54,6 @@ describe "Throttled strategy (:limit => 4) when given 8 tasks" do
     concurrent
   end
   
-  context "after letting 4 tasks finish" do
-    it "should have 4 completed tasks" 
-    it "should have 4 running tasks"
-  end
   context "after letting all tasks finish" do
     before(:each) do
       # 8.times { trigger_write.write_nonblock '.' }
