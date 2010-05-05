@@ -142,6 +142,9 @@ class Procrastinate::Dispatcher
   # master holds. 
   #
   def cleanup
+    # Children dont need the parents signal handler
+    trap(:CHLD, 'DEFAULT')
+    
     # The child doesn't need the control pipe for now.
     control_pipe.each { |io| io.close }
   end
