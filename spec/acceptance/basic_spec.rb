@@ -36,14 +36,14 @@ describe 'Basic operations:' do
       file.read.should == 'success'
     end 
   end
-  # describe "Worker that exits its process" do
-  #   before(:each) do
-  #     proxy.bad_exit
-  #     scheduler.shutdown
-  #   end
-  #   
-  #   it "should not have exited the scheduler (runs in its own process)" do
-  #   end 
-  # end
+  describe "Worker that exits its process" do
+    before(:each) do
+      proxy.bad_exit
+      scheduler.shutdown
+    end
+    
+    it "should not have exited the scheduler (runs in its own process)" do
+    end 
+  end
   
 end
