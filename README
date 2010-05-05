@@ -10,17 +10,18 @@ at/cron like scheduling, combine this library with 'rufus-scheduler'.
 SYNOPSIS
 
   require 'procrastinate'
+  include Procrastinate
 
   class Worker
     def do_work
       puts "> Starting work in process #{Process.pid}"
-      sleep 10
+      sleep 2
       puts "< Work completed in process #{Process.pid}"
     end
   end
 
-  scheduler = Procrastinate::Scheduler.start
-  worker = scheduler.create_proxy(Worker)
+  scheduler = Scheduler.start(DispatchStrategy::Throttled.new(5))
+  worker = scheduler.create_proxy(Worker.new)
 
   10.times do 
     worker.do_work
@@ -30,26 +31,26 @@ SYNOPSIS
   
 The above example will output something like 
 
-  > Starting work in process 742
-  > Starting work in process 743
-  > Starting work in process 744
-  > Starting work in process 745
-  > Starting work in process 746
-  > Starting work in process 747
-  > Starting work in process 748
-  > Starting work in process 749
-  > Starting work in process 750
-  > Starting work in process 751
-  < Work completed in process 742
-  < Work completed in process 743
-  < Work completed in process 744
-  < Work completed in process 745
-  < Work completed in process 746
-  < Work completed in process 747
-  < Work completed in process 748
-  < Work completed in process 749
-  < Work completed in process 750
-  < Work completed in process 751
+  > Starting work in process 6651
+  > Starting work in process 6652
+  > Starting work in process 6653
+  > Starting work in process 6654
+  > Starting work in process 6655
+  < Work completed in process 6651
+  < Work completed in process 6652
+  < Work completed in process 6653
+  < Work completed in process 6654
+  < Work completed in process 6655
+  > Starting work in process 6659
+  > Starting work in process 6660
+  > Starting work in process 6656
+  > Starting work in process 6657
+  > Starting work in process 6658
+  < Work completed in process 6659
+  < Work completed in process 6660
+  < Work completed in process 6656
+  < Work completed in process 6657
+  < Work completed in process 6658
 
 COMPATIBILITY
 
