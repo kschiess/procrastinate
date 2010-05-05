@@ -1,6 +1,75 @@
+INTRO
 
-runs with
-Ruby 1.8
-Ruby 1.9 edge or a version that includes this patch: http://redmine.ruby-lang.org/issues/show/1525
+'procrastinate' does the process handling so you don't have to. It leaves you 
+to concentrate on what to run when, not orchestration of low level details. 
 
-gem dep: blankslate
+This library will be ideal for quickly scheduling of a lot of long running
+tasks. You can easily control how many processes are run at any time. To get
+at/cron like scheduling, combine this library with 'rufus-scheduler'. 
+
+SYNOPSIS
+
+  require 'procrastinate'
+
+  class Worker
+    def do_work
+      puts "> Starting work in process #{Process.pid}"
+      sleep 10
+      puts "< Work completed in process #{Process.pid}"
+    end
+  end
+
+  scheduler = Procrastinate::Scheduler.start
+  worker = scheduler.create_proxy(Worker)
+
+  10.times do 
+    worker.do_work
+  end
+
+  scheduler.shutdown
+  
+The above example will output something like 
+
+  > Starting work in process 742
+  > Starting work in process 743
+  > Starting work in process 744
+  > Starting work in process 745
+  > Starting work in process 746
+  > Starting work in process 747
+  > Starting work in process 748
+  > Starting work in process 749
+  > Starting work in process 750
+  > Starting work in process 751
+  < Work completed in process 742
+  < Work completed in process 743
+  < Work completed in process 744
+  < Work completed in process 745
+  < Work completed in process 746
+  < Work completed in process 747
+  < Work completed in process 748
+  < Work completed in process 749
+  < Work completed in process 750
+  < Work completed in process 751
+
+COMPATIBILITY
+
+This library runs with at least Ruby 1.8.7 and Ruby 1.9. For running it with 
+Ruby 1.9, you need to patch it with the patch found at 
+
+  http://redmine.ruby-lang.org/issues/show/1525
+  
+or run it with at least r25844 of Ruby trunk.
+
+KNOWN BUGS
+
+Due to the way we handle signal traps, you cannot start more than one
+Scheduler. We might allow that in the future. 
+
+STATUS
+
+This code is not released as a gem yet. Once we iron out the bugs we'll 
+release it as 0.1.0. Alpha quality code. 
+
+Please see the LICENSE file for license information. 
+
+(c) 2010 Kaspar Schiess, Patrick Marchi
