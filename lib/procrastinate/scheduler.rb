@@ -6,9 +6,15 @@ class Procrastinate::Scheduler
     @shutdown_requested = false
   end
   
+  # Start a new scheduler
+  def self.start
+    new.start
+  end
   def start
     @strategy   = Procrastinate::DispatchStrategy::Simple.new
     @dispatcher = Procrastinate::Dispatcher.start(strategy)
+    
+    self
   end
   
   def create_proxy(worker_klass)
