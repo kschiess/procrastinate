@@ -93,6 +93,8 @@ class Procrastinate::Dispatcher
   #
   def wakeup
     control_pipe.last.write '.'
+  # rescue IOError
+    # Ignore:
   end
   
   # Waits until the dispatcher completes its work. If you don't initiate a

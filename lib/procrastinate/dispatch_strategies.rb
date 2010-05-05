@@ -6,3 +6,4 @@ module Procrastinate::DispatchStrategy
 end
 
 require 'procrastinate/dispatch_strategy/simple'
+require 'procrastinate/dispatch_strategy/throttled'
