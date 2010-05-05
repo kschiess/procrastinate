@@ -2,16 +2,15 @@ module Procrastinate::Task
   # Constructs an object of type +klass+ and calls a method on it. 
   #
   class MethodCall
-    def initialize(klass, method, arguments, block)
-      @klass = klass
+    def initialize(instance, method, arguments, block)
+      @instance = instance
       @method = method
       @arguments = arguments
       @block = block
     end
     
     def run
-      obj = @klass.new
-      obj.send(@method, *@arguments, &@block)
+      @instance.send(@method, *@arguments, &@block)
     end
   end
 end

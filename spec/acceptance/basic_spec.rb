@@ -16,10 +16,8 @@ describe 'Basic operations:' do
   attr_reader :proxy
   attr_reader :scheduler
   before(:each) do
-    @scheduler = Procrastinate::Scheduler.new
-    scheduler.start
-    
-    @proxy = scheduler.create_proxy(Worker)
+    @scheduler = Procrastinate::Scheduler.start
+    @proxy = scheduler.create_proxy(Worker.new)
   end
 
   describe "Worker writing to a temporary file (orderly shutdown)" do
@@ -45,5 +43,4 @@ describe 'Basic operations:' do
     it "should not have exited the scheduler (runs in its own process)" do
     end 
   end
-  
 end

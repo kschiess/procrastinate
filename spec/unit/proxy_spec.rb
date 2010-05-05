@@ -11,9 +11,8 @@ describe Procrastinate::Proxy do
   attr_reader :klass
   attr_reader :scheduler
   before(:each) do
-    @klass = Worker
     @scheduler = flexmock(:scheduler)
-    @proxy = Procrastinate::Proxy.new(klass, scheduler)
+    @proxy = Procrastinate::Proxy.new(Worker.new, scheduler)
   end
   
   describe "<- #respond_to?" do

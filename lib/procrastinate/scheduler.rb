@@ -17,8 +17,8 @@ class Procrastinate::Scheduler
     self
   end
   
-  def create_proxy(worker_klass)
-    return Procrastinate::Proxy.new(worker_klass, self)
+  def create_proxy(worker)
+    return Procrastinate::Proxy.new(worker, self)
   end
     
   # Called by the proxy to schedule work.
