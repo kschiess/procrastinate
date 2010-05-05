@@ -1,7 +1,5 @@
 
-require 'blankslate'
-
-class Procrastinate::Proxy < BlankSlate
+class Procrastinate::Proxy
   def initialize(worker, scheduler)
     @worker = worker
     @scheduler = scheduler

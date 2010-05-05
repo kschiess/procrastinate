@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Procrastinate::DispatchStrategy::Throttled, 'limited to 2 tasks' do
-  class Task
+  class StubTask
     def initialize
       @started = false
       @complete = false
@@ -33,8 +33,8 @@ describe Procrastinate::DispatchStrategy::Throttled, 'limited to 2 tasks' do
     attr_reader :initial
     attr_reader :others
     before(:each) do
-      @initial = [Task.new, Task.new]
-      @others = [Task.new, Task.new]
+      @initial = [StubTask.new, StubTask.new]
+      @others = [StubTask.new, StubTask.new]
       
       (initial + others).each { |task| strategy.schedule(task) }
       
