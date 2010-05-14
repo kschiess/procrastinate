@@ -20,6 +20,12 @@ class Procrastinate::Scheduler
   def create_proxy(worker)
     return Procrastinate::Proxy.new(worker, self)
   end
+  
+  # Returns a runtime linked to this scheduler. 
+  #
+  def runtime
+    Procrastinate::Runtime.new
+  end
     
   # Called by the proxy to schedule work.
   #

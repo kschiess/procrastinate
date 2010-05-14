@@ -24,4 +24,11 @@ class Procrastinate::Lock
   def release
     file.flock File::LOCK_UN
   end
+  
+  def synchronize
+    acquire
+    yield
+  ensure 
+    release
+  end
 end

@@ -21,30 +21,30 @@ describe Procrastinate::Lock do
     its(:name) { should == 'l1' }
     its(:file) { should_not be_nil }
     
+    # Spawns a subprocess that tries to #acquire 'l1'. 
+    #
+    def acquire_in_subprocess?(name)
+      r, w = IO.pipe
+      fork do
+        l1 = Procrastinate::Lock.new('l1')
+        begin
+          timeout(0.01) do
+            l1.acquire
+            w.write 's'
+          end
+        rescue 
+          w.write 'f'
+        end
+        exit 0
+      end
+      Process.wait2
+
+      IO.select([r])
+      r.read_nonblock(1) == 's'
+    end
+    
     context "when lock has been acquired" do
       before(:each) { subject.acquire }
-      
-      # Spawns a subprocess that tries to #acquire 'l1'. 
-      #
-      def acquire_in_subprocess?(name)
-        r, w = IO.pipe
-        fork do
-          l1 = Procrastinate::Lock.new('l1')
-          begin
-            timeout(0.01) do
-              l1.acquire
-              w.write 's'
-            end
-          rescue 
-            w.write 'f'
-          end
-          exit 0
-        end
-        Process.wait2
-
-        IO.select([r])
-        r.read_nonblock(1) == 's'
-      end
       
       it "should allow acquire multiple times" do
         timeout(1) { subject.acquire }
@@ -63,6 +63,14 @@ describe Procrastinate::Lock do
           acquire_in_subprocess?('l1').should == true
         end 
       end
+    end
+    describe "<- #synchronize" do
+      it "should not allow reacquire from another process" do
+        subject.synchronize do
+          acquire_in_subprocess?('l1').should == false
+        end
+        acquire_in_subprocess?('l1').should == true
+      end 
     end
   end
 end
