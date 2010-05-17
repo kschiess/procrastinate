@@ -33,7 +33,7 @@ describe Procrastinate::Lock do
             l1.acquire
             w.write 's'
           end
-        rescue TimeoutError
+        rescue Timeout::Error
           w.write 'f'
         end
         exit 0
