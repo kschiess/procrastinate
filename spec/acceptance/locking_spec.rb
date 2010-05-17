@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'tempfile'
 
 describe "Scheduling 100 processes that fight for the same lock" do
-  class Worker
+  class LockingWorker
     attr_reader :runtime
     attr_reader :write_end
     def initialize(runtime, write_end)
@@ -43,7 +43,7 @@ describe "Scheduling 100 processes that fight for the same lock" do
   before(:each) do
     scheduler = Procrastinate::Scheduler.start
     runtime = scheduler.runtime
-    worker = scheduler.create_proxy(Worker.new(runtime, write_end))
+    worker = scheduler.create_proxy(LockingWorker.new(runtime, write_end))
     
     100.times do worker.do end
       

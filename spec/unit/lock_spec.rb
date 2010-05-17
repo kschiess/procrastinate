@@ -26,20 +26,21 @@ describe Procrastinate::Lock do
     def acquire_in_subprocess?(name)
       r, w = IO.pipe
       fork do
+        r.close
         l1 = Procrastinate::Lock.new('l1')
         begin
           timeout(0.01) do
             l1.acquire
             w.write 's'
           end
-        rescue 
+        rescue TimeoutError
           w.write 'f'
         end
         exit 0
       end
       Process.wait2
 
-      IO.select([r])
+      IO.select([r], nil, nil, 1)
       r.read_nonblock(1) == 's'
     end
     
