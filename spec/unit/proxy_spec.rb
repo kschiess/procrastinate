@@ -32,6 +32,8 @@ describe Procrastinate::Proxy do
       
       proxy.do_work(1,2,3)
     end 
-    it "should return a status object" 
+    it "should return a status object" do
+      pending
+    end
   end
 end
