@@ -14,11 +14,18 @@ describe Procrastinate::Dispatcher do
       @dispatcher = Procrastinate::Dispatcher.start(strategy)
     end
     
-    it "should stop the thread when all running tasks complete" do
-      dispatcher.stop
+    context "after stopping the dispatcher" do
+      before(:each) { dispatcher.stop }
       
-      dispatcher.thread.should_not be_alive
-    end 
+      it "should stop the thread when all running tasks complete" do
+        dispatcher.thread.should_not be_alive
+      end 
+      it "should unregister signals: CHLD" do
+        # If no signal handler is installed, the trap method returns nil
+        trap('CHLD', 'DEFAULT').should be_nil
+      end 
+    end
+    
     context "that expects completion to be called" do
       before(:each) do
         @completed = false

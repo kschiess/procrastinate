@@ -44,6 +44,7 @@ class Procrastinate::Dispatcher
   def stop
     request_stop
     join
+    unregister_signals
   end
 
   # Called from the dispatcher thread, will cause the dispatcher to wait on
@@ -60,6 +61,9 @@ class Procrastinate::Dispatcher
   
   def register_signals
     trap('CHLD') { wakeup }
+  end
+  def unregister_signals
+    trap('CHLD', 'DEFAULT')
   end
   
   def start_thread
@@ -153,7 +157,7 @@ class Procrastinate::Dispatcher
   #
   def wait_for_all_childs
     until handlers.empty?
-      sleep 0.1
+      sleep 0.01
       reap_workers
     end
   end
