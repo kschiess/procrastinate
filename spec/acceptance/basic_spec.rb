@@ -8,7 +8,8 @@ describe 'Basic operations:' do
       file.write "success"
       file.close
     end
-    def bad_exit
+    def bad_exit(file)
+      file.write 'exit'
       exit 0
     end
   end
@@ -35,12 +36,30 @@ describe 'Basic operations:' do
     end 
   end
   describe "Worker that exits its process" do
-    before(:each) do
-      proxy.bad_exit
-      scheduler.shutdown
+    let(:file) { Tempfile.new('basic_op') }
+    
+    def contents(file)
+      file.rewind
+      file.read
     end
     
     it "should not have exited the scheduler (runs in its own process)" do
+      proxy.bad_exit(file)
+
+      # Wait for the file to contain proof of process that exits
+      timeout(2) do
+        loop do
+          break if contents(file) == 'exit'
+        end
+      end
+
+      file.rewind
+      proxy.write_to_file(file)
+      scheduler.shutdown
+      
+      # We did successfully execute something after quitting a first process. 
+      # That must mean that the scheduler continued to work.
+      contents(file).should == 'success'
     end 
   end
 end
