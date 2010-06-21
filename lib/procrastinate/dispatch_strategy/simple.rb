@@ -16,7 +16,7 @@ class Procrastinate::DispatchStrategy::Simple
 
   # Client thread
   def schedule(task)
-    raise ShutdownRequested if shutdown_requested?
+    raise ::ShutdownRequested if shutdown_requested?
     
     queue.push task
   end
