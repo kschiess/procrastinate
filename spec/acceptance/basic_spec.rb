@@ -4,6 +4,9 @@ require 'tempfile'
 
 describe 'Basic operations:' do
   class Worker
+    def nop
+      print '.'
+    end
     def write_to_file(file)
       file.write "success"
       file.close
@@ -60,6 +63,15 @@ describe 'Basic operations:' do
       # We did successfully execute something after quitting a first process. 
       # That must mean that the scheduler continued to work.
       contents(file).should == 'success'
+    end 
+  end
+  describe "Worker doing nothing when started many times" do
+    it "should not exhaust OS resources" do
+      100.times do
+        proxy.nop
+      end
+      
+      scheduler.shutdown
     end 
   end
 end
