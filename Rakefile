@@ -20,7 +20,7 @@ spec = Gem::Specification.new do |s|
   s.name              = "procrastinate"
   s.version           = "0.1.0"
   s.summary           = "Framework to run tasks in separate processes."
-  s.author            = ['Kaspar Schiess', 'Patrick Marchi']
+  s.authors           = ['Kaspar Schiess', 'Patrick Marchi']
   s.email             = ['kaspar.schiess@absurd.li', 'mail@patrickmarchi.ch']
   s.homepage          = "http://github.com/kschiess/procrastinate"
 
