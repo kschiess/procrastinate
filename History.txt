@@ -1,2 +1,2 @@
-= 0.1.0 / ???
+= 0.1.0 / 10Dez2010
   * Initial version
