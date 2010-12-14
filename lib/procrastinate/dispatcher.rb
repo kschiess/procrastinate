@@ -28,6 +28,9 @@ class Procrastinate::Dispatcher
     @stop_requested = false
   end
 
+  # Initialize and start a dispatcher. This is the main method to create a 
+  # new dispatcher. 
+  #
   def self.start(strategy)
     new(strategy).tap do |dispatcher| 
       dispatcher.start
@@ -59,14 +62,23 @@ class Procrastinate::Dispatcher
     @stop_requested
   end
   
+  # Register signals that aid in child care. NB: Because we do this globally, 
+  # holding more than one dispatcher in a process will not work yet. 
+  #
   def register_signals
     trap('CHLD') { wakeup }
   end
+  
+  # Unregister signals. Process should be as before. 
+  #
   def unregister_signals
     trap('CHLD', 'DEFAULT')
   end
   
-  def start_thread
+  # Hosts the control thread that runs in parallel with your code. This thread
+  # handles child spawning and reaping. 
+  #
+  def start_thread # :nodoc: 
     @thread = Thread.new do
       Thread.current.abort_on_exception = true
       
@@ -84,6 +96,9 @@ class Procrastinate::Dispatcher
     end
   end
   
+  # Called from the child management thread, will put that thread to sleep 
+  # until someone requests it to become active again. See #wakeup. 
+  #
   def wait_for_event
     # Returns array<ready_for_read, ..., ...>
     IO.select([control_pipe.first], nil, nil)
