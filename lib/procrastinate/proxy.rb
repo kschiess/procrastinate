@@ -1,6 +1,12 @@
-
+# A proxy class that will translate all method calls made on it to method 
+# calls inside their own process via the Scheduler. 
+#
 class Procrastinate::Proxy
-  def initialize(worker, scheduler)
+  # Create a new proxy class. +worker+ is an instance of the class that we 
+  # want to perform work in, +scheduler+ is where the work will be scheduled. 
+  # Don't call this on your own, instead use Scheduler#create_proxy. 
+  #
+  def initialize(worker, scheduler) # :nodoc: 
     @worker = worker
     @scheduler = scheduler
   end

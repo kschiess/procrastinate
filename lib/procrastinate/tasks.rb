@@ -1,3 +1,6 @@
+
+# A collection of tasks that can be performed with procrastinate. 
+#
 module Procrastinate::Task
   # Constructs an object of type +klass+ and calls a method on it. 
   #

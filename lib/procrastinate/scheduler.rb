@@ -1,3 +1,7 @@
+
+# API Frontend for the procrastinate library. Allows scheduling of tasks
+# and workers in seperate processes and provides minimal locking primitives. 
+#
 class Procrastinate::Scheduler
   attr_reader :dispatcher
   attr_reader :strategy
