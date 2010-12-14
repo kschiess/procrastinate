@@ -154,6 +154,9 @@ class Procrastinate::Dispatcher
       exit! # this seems to be needed to avoid rspecs cleanup tasks
     end
     
+    # The spawning is done in the same thread as the reaping is done. This is 
+    # why no race condition to the following line exists. (or in other code, 
+    # for that matter.)
     handlers[pid] = completion_handler
   end
   
