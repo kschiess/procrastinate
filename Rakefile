@@ -3,8 +3,6 @@ require 'rspec/core/rake_task'
 Rspec::Core::RakeTask.new
 task :default => :spec
 
-task :default => :spec
-
 require "rubygems"
 require "rake/gempackagetask"
 require "rake/rdoctask"
@@ -41,6 +39,13 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency("flexmock")
 end
 
+desc "Regenerate the .gemspec file for github/bundler."
+task :gemspec do
+  # Generate the gemspec file for github.
+  file = File.dirname(__FILE__) + "/#{spec.name}.gemspec"
+  File.open(file, "w") {|f| f << spec.to_ruby }
+end
+
 # This task actually builds the gem. We also regenerate a static
 # .gemspec file, which is useful if something (i.e. GitHub) will
 # be automatically building a gem for this project. If you're not
@@ -50,10 +55,6 @@ end
 # about that here: http://gemcutter.org/pages/gem_docs
 Rake::GemPackageTask.new(spec) do |pkg|
   pkg.gem_spec = spec
-
-  # Generate the gemspec file for github.
-  file = File.dirname(__FILE__) + "/#{spec.name}.gemspec"
-  File.open(file, "w") {|f| f << spec.to_ruby }
 end
 
 # Generate documentation
