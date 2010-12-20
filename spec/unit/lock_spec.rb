@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require 'tempfile'
-
 describe Procrastinate::Lock do
   def tempdir
     t = Tempfile.new('procrastinate_lock_spec')
