@@ -8,6 +8,7 @@ describe 'Basic operations:' do
       print '.'
     end
     def write_to_file(file)
+      p :write_to_file
       file.write "success"
       file.close
     end
@@ -17,17 +18,12 @@ describe 'Basic operations:' do
     end
   end
   
-  attr_reader :proxy
-  attr_reader :scheduler
-  before(:each) do
-    @scheduler = Procrastinate::Scheduler.start
-    @proxy = scheduler.create_proxy(Worker.new)
-  end
+  let(:scheduler) { Procrastinate::Scheduler.start }
+  let(:proxy)     { scheduler.create_proxy(Worker.new) }
 
   describe "Worker writing to a temporary file (orderly shutdown)" do
-    attr_reader :file
+    let(:file) { Tempfile.new('basic_op') }
     before(:each) do
-      @file = Tempfile.new('basic_op')
       proxy.write_to_file(file)
       
       scheduler.shutdown

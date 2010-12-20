@@ -13,13 +13,17 @@ class Procrastinate::DispatchStrategy::Throttled < Procrastinate::DispatchStrate
     @current = 0
   end
   
-  # Dispatcher thread
-  def spawn(dispatcher)
-    super(dispatcher) { @current -= 1 }
-    @current += 1
-  end
   def should_spawn?
-    super &&
-      current < limit
+    current < limit
+  end
+  
+  def notify_spawn
+    @current += 1
+    warn "Throttled reports too many births!" if current >= limit
+  end
+  
+  def notify_dead
+    @current -= 1
+    warn "Throttled reports more deaths than births?!" if current < 0
   end
 end
