@@ -2,7 +2,7 @@
 # A dispatcher strategy that throttles tasks starting and ensures that no
 # more than limit processes run concurrently. 
 #
-class Procrastinate::DispatchStrategy::Throttled < Procrastinate::DispatchStrategy::Simple
+class Procrastinate::SpawnStrategy::Throttled < Procrastinate::SpawnStrategy::Simple
   attr_reader :limit, :current
   
   # Client thread

@@ -14,7 +14,7 @@ class Procrastinate::Scheduler
   attr_reader :task_queue
     
   def initialize(strategy)
-    @strategy   = strategy || Procrastinate::DispatchStrategy::Simple.new
+    @strategy   = strategy || Procrastinate::SpawnStrategy::Simple.new
     @dispatcher = Procrastinate::Dispatcher.new
 
     @state      = :running

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Procrastinate::DispatchStrategy::Throttled, 'limited to 2 tasks' do
+describe Procrastinate::SpawnStrategy::Throttled, 'limited to 2 tasks' do
   class StubTask
     def initialize
       @started = false
@@ -25,7 +25,7 @@ describe Procrastinate::DispatchStrategy::Throttled, 'limited to 2 tasks' do
   attr_reader :strategy
   attr_reader :dispatcher
   before(:each) do
-    @strategy = Procrastinate::DispatchStrategy::Throttled.new(2)
+    @strategy = Procrastinate::SpawnStrategy::Throttled.new(2)
     @dispatcher = StubDispatcher.new
   end
   

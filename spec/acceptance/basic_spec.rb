@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+require 'timeout'
 require 'tempfile'
 
 describe 'Basic operations:' do

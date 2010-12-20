@@ -1,9 +1,10 @@
 
-module Procrastinate; end
+module Procrastinate
+  autoload :Lock,     'procrastinate/lock'
+  autoload :Runtime,  'procrastinate/runtime'
+end
 
-require 'procrastinate/runtime'
-require 'procrastinate/lock'
-require 'procrastinate/dispatch_strategies'
+require 'procrastinate/spawn_strategy'
 require 'procrastinate/tasks'
 require 'procrastinate/proxy'
 require 'procrastinate/dispatcher'

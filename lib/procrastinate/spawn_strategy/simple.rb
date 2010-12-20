@@ -1,5 +1,5 @@
 
-class Procrastinate::DispatchStrategy::Simple
+class Procrastinate::SpawnStrategy::Simple
   def should_spawn?
     true
   end
