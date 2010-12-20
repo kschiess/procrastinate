@@ -14,6 +14,9 @@ describe 'Basic operations:' do
       file.write 'exit'
       exit 0
     end
+    def the_answer
+      42
+    end
   end
   
   let(:scheduler) { Procrastinate::Scheduler.start }
@@ -60,12 +63,17 @@ describe 'Basic operations:' do
     end 
   end
   describe "Worker doing nothing when started many times" do
+    after(:each) { scheduler.shutdown }
     it "should not exhaust OS resources" do
       100.times do
         proxy.nop
       end
-      
-      scheduler.shutdown
     end 
+  end
+  describe "Worker#the_answer return value" do
+    subject { proxy.the_answer }
+    after(:each) { scheduler.shutdown }
+    
+    its(:value) { should == 42 }
   end
 end

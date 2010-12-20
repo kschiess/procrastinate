@@ -20,5 +20,9 @@ module Procrastinate::Task
     def run
       @i.send(@m, *@a, &@b)
     end
+    
+    def result
+      # TODO this should return & cache a value
+    end
   end
 end
