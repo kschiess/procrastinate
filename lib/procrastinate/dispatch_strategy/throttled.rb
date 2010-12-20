@@ -19,7 +19,7 @@ class Procrastinate::DispatchStrategy::Throttled < Procrastinate::DispatchStrate
   
   def notify_spawn
     @current += 1
-    warn "Throttled reports too many births!" if current >= limit
+    warn "Throttled reports too many births!" if current > limit
   end
   
   def notify_dead
