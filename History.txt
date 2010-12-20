@@ -1,2 +1,6 @@
+= 0.2.0 
+  * Big rewrite, trying to make things more clear. Also: There might be more
+    features lurking in there.
+
 = 0.1.0 / 10Dez2010
   * Initial version

@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{procrastinate}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kaspar Schiess", "Patrick Marchi"]
-  s.date = %q{2010-12-10}
+  s.date = %q{2010-12-20}
   s.email = ["kaspar.schiess@absurd.li", "mail@patrickmarchi.ch"]
   s.extra_rdoc_files = ["README"]
   s.files = ["LICENSE", "Rakefile", "README", "spec", "lib/procrastinate", "lib/procrastinate/dispatch_strategies.rb", "lib/procrastinate/dispatch_strategy", "lib/procrastinate/dispatch_strategy/simple.rb", "lib/procrastinate/dispatch_strategy/throttled.rb", "lib/procrastinate/dispatcher.rb", "lib/procrastinate/lock.rb", "lib/procrastinate/proxy.rb", "lib/procrastinate/runtime.rb", "lib/procrastinate/scheduler.rb", "lib/procrastinate/tasks.rb", "lib/procrastinate.rb"]
