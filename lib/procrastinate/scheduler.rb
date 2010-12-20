@@ -17,6 +17,9 @@ class Procrastinate::Scheduler
     @strategy   = strategy || Procrastinate::SpawnStrategy::Simple.new
     @dispatcher = Procrastinate::Dispatcher.new
 
+    # State takes three values: :running, :soft_shutdown, :real_shutdown
+    # :soft_shutdown will not accept any new tasks and wait for completion
+    # :real_shutdown will stop as soon as possible (still closing down nicely)
     @state      = :running
     @task_queue = Queue.new
   end
@@ -84,7 +87,8 @@ class Procrastinate::Scheduler
   end
   
 private
-  # Spawns new tasks (if needed).
+  # Spawns new tasks (if needed). This is only ever called from the control
+  # thread (see below). 
   # 
   def spawn
     while strategy.should_spawn? && !task_queue.empty?
