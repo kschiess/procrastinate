@@ -3,10 +3,10 @@ require 'spec_helper'
 describe 'Basic operations:' do
   class Worker
     def nop
-      print '.'
+      # print '.'
     end
     def write_to_file(file)
-      p :write_to_file
+      # p :write_to_file
       file.write "success"
       file.close
     end
