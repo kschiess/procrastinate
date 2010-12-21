@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe Procrastinate::IPC::Endpoint do
+  include Procrastinate::IPC
+  
   # Eventually, this API might look like this: 
   # 
   # Endpoint.anonymous.server
@@ -10,7 +12,7 @@ describe Procrastinate::IPC::Endpoint do
   #
   # But right now, I only need the first example (server/client)
   #
-  let(:anonymous) { Procrastinate::IPC::Endpoint.anonymous }
+  let(:anonymous) { Endpoint.anonymous }
   let(:server) { anonymous.server }
   let(:client) { anonymous.client }
   
@@ -18,24 +20,34 @@ describe Procrastinate::IPC::Endpoint do
     before(:each) { client.send('foobar') }
     subject { server.receive }
     it { should == 'foobar' }
+    
+    context "when another message is waiting" do
+      before(:each) { client.send('foobaz') }
+
+      subject { server.receive }
+      it { should == 'foobar' }
+    end
   end
   
   describe "<- #select([read])" do
+    it "should return nil if a timeout occurs" do
+      Endpoint.select([], 0.1)
+    end 
     it "should return selectors that are ready" do
-      other = Procrastinate::IPC::Endpoint.anonymous
+      other = Endpoint.anonymous
       client.send 'message'
       
-      result = Endpoint.select([other.server, server])
-      result.should have(3).parts
-      result.first.should include(server)
+      result = Endpoint.select([other.server, server], 0.1)
+      result.should have(1).parts
+      result.should include(server)
     end
     it "should allow mixed selectors (Unix and Endpoint ones)" do
       r, w = IO.pipe
       w.write('foo')
       
-      result = Endpoint.select([r, server])
-      result.should have(3).parts
-      result.first.should include(r)
+      result = Endpoint.select([r, server], 0.1)
+      result.should have(1).parts
+      result.should include(r)
     end 
   end
 end
