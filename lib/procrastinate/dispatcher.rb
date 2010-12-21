@@ -18,15 +18,16 @@ class Procrastinate::Dispatcher
     @stop_requested = false
   end
   
-  # Sets up resource usage for dispatcher. 
+  # Sets up resource usage for dispatcher. You must call this before dispatcher
+  # can start its work. 
   #
   def setup
     register_signals
   end
   
   # Performs one step in the dispatchers work. This will sleep and wait
-  # for work to be done, then wake up and do some work. Use #wakeup to signal
-  # that work has arrived. 
+  # for work to be done, then wake up and reap processes that are still 
+  # pending. This method will mostly sleep. 
   #
   def step
     # Sleep until either work arrives or we receive a SIGCHLD
@@ -35,7 +36,8 @@ class Procrastinate::Dispatcher
     reap_childs
   end
   
-  # Tears down the dispatcher. 
+  # Tears down the dispatcher. This frees resources that have been allocated
+  # and waits for all children to terminate. 
   #
   def teardown
     wait_for_all_childs
