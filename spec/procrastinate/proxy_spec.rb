@@ -24,6 +24,8 @@ describe Procrastinate::Proxy do
     end 
   end
   describe "missing method" do
+    before(:each) { scheduler.should_receive(:schedule).by_default }
+
     it "should enqueue work" do
       scheduler.
         should_receive(:schedule).
@@ -33,7 +35,7 @@ describe Procrastinate::Proxy do
       proxy.do_work(1,2,3)
     end 
     it "should return a status object" do
-      pending
+      proxy.do_work(1).should_not be_nil
     end
   end
 end
