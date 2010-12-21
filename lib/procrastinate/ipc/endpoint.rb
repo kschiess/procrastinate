@@ -97,7 +97,7 @@ module Procrastinate::IPC::Endpoint
     def initialize(pipe)
       @pipe = pipe
     end
-
+    
     def send(msg)
       buffer = [msg.size].pack('l') + msg
       pipe.write(buffer)

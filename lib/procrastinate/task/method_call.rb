@@ -30,6 +30,6 @@ class Procrastinate::Task::MethodCall
   end
   
   def result
-    Result.new
+    @result ||= Result.new
   end
 end

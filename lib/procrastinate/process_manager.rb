@@ -208,13 +208,13 @@ class Procrastinate::ProcessManager
     
     pid = fork do
       cleanup
-      
-      # if result
-      #   endpoint = ObjectEndpoint.new(@cmc_client, Process.pid)
-      #   task.run(endpoint)
-      # else
+            
+      if result
+        endpoint = ObjectEndpoint.new(@cmc_client, Process.pid)
+        task.run(endpoint)
+      else
         task.run(nil)
-      # end
+      end
 
       exit! # this seems to be needed to avoid rspecs cleanup tasks
     end
@@ -240,7 +240,7 @@ class Procrastinate::ProcessManager
   #
   def wait_for_all_childs
     # TODO Maybe signal KILL to children after some time. 
-    until children.empty?
+    until children.all? { |p, c| c.dead? }
       wait_for_event
       reap_childs
     end

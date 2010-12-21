@@ -75,5 +75,9 @@ describe 'Basic operations:' do
     after(:each) { scheduler.shutdown }
     
     its(:value) { should == 42 }
+    context "after accessing value (blocking)" do
+      before(:each) { subject.value }
+      its(:ready?) { should == true }
+    end
   end
 end

@@ -9,13 +9,13 @@ require 'thread'
 # in this class.
 #
 class Procrastinate::Scheduler
-  attr_reader :dispatcher
+  attr_reader :manager
   attr_reader :strategy
   attr_reader :task_queue
     
   def initialize(strategy)
     @strategy   = strategy || Procrastinate::SpawnStrategy::Simple.new
-    @dispatcher = Procrastinate::ProcessManager.new
+    @manager = Procrastinate::ProcessManager.new
 
     # State takes three values: :running, :soft_shutdown, :real_shutdown
     # :soft_shutdown will not accept any new tasks and wait for completion
@@ -62,7 +62,7 @@ class Procrastinate::Scheduler
     task_queue << task
     
     # Create an occasion for spawning
-    dispatcher.wakeup
+    manager.wakeup
   end
   
   # Immediately shuts down the procrastinate thread and frees resources. 
@@ -72,16 +72,16 @@ class Procrastinate::Scheduler
     unless hard
       @state = :soft_shutdown
       loop do
-        dispatcher.wakeup
+        manager.wakeup
         break if task_queue.empty?
       end
     end
     
     # Set the flag that will provoke shutdown
     @state = :real_shutdown
-    # Wake the dispatcher up, making it check the flag
-    dispatcher.wakeup
-    # Wait for the dispatcher to finish its work. This waits for child 
+    # Wake the manager up, making it check the flag
+    manager.wakeup
+    # Wait for the manager to finish its work. This waits for child 
     # processes and then reaps their result, avoiding zombies.
     @thread.join
   end
@@ -93,7 +93,7 @@ private
   def spawn
     while strategy.should_spawn? && !task_queue.empty?
       task = task_queue.pop
-      dispatcher.create_process(task) do
+      manager.create_process(task) do
         strategy.notify_dead
       end
       strategy.notify_spawn
@@ -104,18 +104,18 @@ private
   # #start_thread
   #
   def run
-    # Start dispatchers work
-    dispatcher.setup
+    # Start managers work
+    manager.setup
 
     # Loop until someone requests a shutdown.
     loop do
-      dispatcher.step
+      manager.step
 
       break if @state == :real_shutdown
       spawn
     end
 
-    dispatcher.teardown
+    manager.teardown
   rescue => ex
     # Sometimes exceptions vanish silently. This will avoid that, even though
     # they should abort the whole process.
