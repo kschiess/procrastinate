@@ -135,7 +135,6 @@ class Procrastinate::ProcessManager
       kill_children
       
       if ready.include? cp_read_end
-        p :control_message
         # Consume the data (not important)
         cp_read_end.read_nonblock(1024)
         return

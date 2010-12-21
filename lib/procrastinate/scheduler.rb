@@ -109,11 +109,9 @@ private
 
     # Loop until someone requests a shutdown.
     loop do
-puts "Stepping"
       dispatcher.step
 
       break if @state == :real_shutdown
-puts "Spawning new ones..."
       spawn
     end
 
