@@ -55,11 +55,12 @@ The above example will output something like
 COMPATIBILITY
 
 This library runs with at least Ruby 1.8.7 and Ruby 1.9. For running it with 
-Ruby 1.9, you need to patch it with the patch found at 
+Ruby 1.9, you need to run it with at least r25844 of Ruby trunk or if not,
+patch it with the patch found at 
 
   http://redmine.ruby-lang.org/issues/show/1525
   
-or run it with at least r25844 of Ruby trunk.
+.
 
 KNOWN BUGS
 
@@ -68,8 +69,7 @@ Scheduler. We might allow that in the future.
 
 STATUS
 
-This code is not released as a gem yet. Once we iron out the bugs we'll 
-release it as 0.1.0. Alpha quality code. 
+This code is released as 0.1.0. Alpha quality code. 
 
 Please see the LICENSE file for license information. 
 
