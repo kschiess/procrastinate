@@ -15,7 +15,7 @@ class Procrastinate::Scheduler
     
   def initialize(strategy)
     @strategy   = strategy || Procrastinate::SpawnStrategy::Simple.new
-    @dispatcher = Procrastinate::Dispatcher.new
+    @dispatcher = Procrastinate::ProcessManager.new
 
     # State takes three values: :running, :soft_shutdown, :real_shutdown
     # :soft_shutdown will not accept any new tasks and wait for completion

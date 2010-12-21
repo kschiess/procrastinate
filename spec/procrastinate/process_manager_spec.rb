@@ -2,5 +2,5 @@ require 'spec_helper'
 
 require 'thread'
 
-describe Procrastinate::Dispatcher do
+describe Procrastinate::ProcessManager do
 end

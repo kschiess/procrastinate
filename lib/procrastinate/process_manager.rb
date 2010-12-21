@@ -3,19 +3,55 @@
 # manipulation here, no strategy. The only methods you should call from the
 # outside are #setup, #step, #wakeup and #shutdown. 
 #
-class Procrastinate::Dispatcher
+class Procrastinate::ProcessManager
+  include Procrastinate::IPC
+  
   # This pipe is used to wait for events in the master process. 
   attr_reader :control_pipe
   
   # A hash of <pid, callback> that contains callbacks for all the child
   # processes we spawn. Once the process is complete, the callback is called
   # in the procrastinate thread.
-  attr_reader :handlers
+  attr_reader :children
+  
+  # A class that acts as a filter between ProcessManager and the endpoint it
+  # uses to communicate with its children. This converts Ruby objects into
+  # Strings and also sends process id. 
+  #
+  class ObjectEndpoint < Struct.new(:endpoint, :pid)
+    def send(obj)
+      msg = Marshal.dump([pid, obj])
+      endpoint.send(msg)
+    end
+  end
+  
+  # A <completion handler, result> tuple that stores the handler to call when
+  # a child exits and the object that will handle child-master communication
+  # if desired.
+  #
+  class Child < Struct.new(:handler, :result)
+    # Calls the completion handler if there is one. 
+    #
+    def you_are_dead
+      handler.call if handler
+    end
+    
+    # Handles incoming messages from the tasks process.
+    #
+    def incoming_message(obj)
+      result.incoming_message(obj) if result
+    end
+  end
   
   def initialize
     @control_pipe = IO.pipe
-    @handlers = {}
+    @children = {}
     @stop_requested = false
+    
+    # Child Master Communication (cmc)
+    endpoint = Endpoint.anonymous
+    @cmc_server = endpoint.server
+    @cmc_client = endpoint.client
   end
   
   # Sets up resource usage for dispatcher. You must call this before dispatcher
@@ -71,12 +107,42 @@ class Procrastinate::Dispatcher
   # until someone requests it to become active again. See #wakeup. 
   #
   def wait_for_event
-    # Returns array<ready_for_read, ..., ...>
-    IO.select([control_pipe.first], nil, nil)
+    cp_read_end = control_pipe.first
+    
+    loop do # until we have input in the cp_read_end (control_pipe)
+      # Returns array<ready_for_read, ..., ...>
+      ready = Endpoint.select([cp_read_end, @cmc_server])
+    
+      ready.each do |io|
+        if io == cp_read_end
+          # Consume the data (not important)
+          cp_read_end.read_nonblock(1024)
+          return
+        else
+          msg = @cmc_server.receive
+          handle_child_message(msg)
+        end
+      end
+    end
 
-    # Consume the data (not important)
-    control_pipe.first.read_nonblock(1024)
-  rescue Errno::EAGAIN, Errno::EINTR
+  # rescue Errno::EAGAIN, Errno::EINTR
+    # A signal has been received. Mostly, this is as if we had received
+    # something in the control pipe.
+  end
+  
+  # Called for every message sent from a child. The +msg+ param here is a string
+  # that still needs decoding. 
+  #
+  def handle_child_message(msg)
+    pid, obj = Marshal.load(msg)
+    if child=children[pid]
+      child.incoming_message(obj)
+    else
+      warn "Communication from child #{pid} received, but child is gone."
+    end
+  rescue => b
+    # Messages that cannot be unmarshalled will be ignored. 
+    warn "Can't unmarshal child communication."
   end
       
   # Calls completion handlers for all the childs that have now exited.
@@ -85,14 +151,14 @@ class Procrastinate::Dispatcher
     loop do
       child_pid, status = Process.waitpid2(-1, Process::WNOHANG)
       break unless child_pid
-
+      
       # Trigger the completion callback
-      handler = handlers.delete(child_pid)
-      handler.call(child_pid) if handler
+      child = children.delete(child_pid)
+      child.you_are_dead
     end
   rescue Errno::ECHILD
     # Ignore: This means that no childs remain. 
-    unless handlers.empty?
+    unless children.empty?
       fail "Received ECHILD - no childs left, but some handlers remain uncalled!"
     end
   end
@@ -106,10 +172,19 @@ class Procrastinate::Dispatcher
   #   spawn(wi) { |pid| puts "Task is complete" }
   #
   def create_process(task, &completion_handler)
+    # Tasks that are interested in getting messages from their childs must 
+    # provide a result object that handles incoming 'result' messages.
+    result = task.result
+    
     pid = fork do
       cleanup
-
-      task.run
+      
+      if result
+        endpoint = ObjectEndpoint.new(@cmc_client, Process.pid)
+        task.run(endpoint)
+      else
+        task.run(nil)
+      end
 
       exit! # this seems to be needed to avoid rspecs cleanup tasks
     end
@@ -117,7 +192,7 @@ class Procrastinate::Dispatcher
     # The spawning is done in the same thread as the reaping is done. This is 
     # why no race condition to the following line exists. (or in other code, 
     # for that matter.)
-    handlers[pid] = completion_handler
+    children[pid] = Child.new(completion_handler, result)
   end
   
   # Gets executed in child process to clean up file handles and pipes that the
@@ -135,7 +210,7 @@ class Procrastinate::Dispatcher
   #
   def wait_for_all_childs
     # TODO Maybe signal KILL to children after some time. 
-    until handlers.empty?
+    until children.empty?
       wait_for_event
       reap_childs
     end
