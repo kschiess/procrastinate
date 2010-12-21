@@ -6,36 +6,32 @@ require 'thread'
 #
 class Procrastinate::Task::Result
   def initialize
-    @mutex = Mutex.new
-
-    @value_ready_cv = ConditionVariable.new
+    @wakeup_m       = Mutex.new
+    @wakeup         = []
+    
     @value_ready    = false
     @value          = nil
-    
-    p [:initialize, object_id]
   end
   
   # Gets passed all messages sent by the child process for this task.
   #
   def incoming_message(obj)
-    @mutex.synchronize do
-      return if ready?    # discard.
-
-      @value = obj
-
-      @value_ready = true
-      @value_ready_cv.broadcast
+    return if ready?
+    
+    @value = obj
+    @value_ready = true
+    
+    @wakeup_m.synchronize do
+      @wakeup.each { |t| t.run }
     end
   end
 
   def value
-    p [:value, object_id, Thread.current]
-    @mutex.synchronize do
-      while not ready?
-        p :not_ready
-        @value_ready_cv.wait(@mutex)
-        p :ready?, ready?
+    while not ready?
+      @wakeup_m.synchronize do
+        @wakeup << Thread.current
       end
+      sleep
     end
     
     @value

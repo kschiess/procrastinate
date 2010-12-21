@@ -128,7 +128,7 @@ class Procrastinate::ProcessManager
       if ready.include? @cmc_server
         read_child_messages
       end
-      
+
       # Kill children here, since we've just depleted the communication
       # endpoint. This avoids communication to children that aren't there
       # anymore.
