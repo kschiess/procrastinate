@@ -19,4 +19,23 @@ describe Procrastinate::IPC::Endpoint do
     subject { server.receive }
     it { should == 'foobar' }
   end
+  
+  describe "<- #select([read])" do
+    it "should return selectors that are ready" do
+      other = Procrastinate::IPC::Endpoint.anonymous
+      client.send 'message'
+      
+      result = Endpoint.select([other.server, server])
+      result.should have(3).parts
+      result.first.should include(server)
+    end
+    it "should allow mixed selectors (Unix and Endpoint ones)" do
+      r, w = IO.pipe
+      w.write('foo')
+      
+      result = Endpoint.select([r, server])
+      result.should have(3).parts
+      result.first.should include(r)
+    end 
+  end
 end
