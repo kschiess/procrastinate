@@ -43,9 +43,10 @@ describe 'Basic operations:' do
       file.read
     end
     
+    let(:result) { proxy.bad_exit(file) }
+    before(:each) { result }
+    
     it "should not have exited the scheduler (runs in its own process)" do
-      proxy.bad_exit(file)
-
       # Wait for the file to contain proof of process that exits
       timeout(2) do
         loop do
@@ -60,6 +61,13 @@ describe 'Basic operations:' do
       # We did successfully execute something after quitting a first process. 
       # That must mean that the scheduler continued to work.
       contents(file).should == 'success'
+    end 
+    it "should raise an exception for everyone accessing the value" do
+      lambda {
+        timeout(1) do
+          result.value
+        end
+      }.should raise_error(Procrastinate::ChildDeath)
     end 
   end
   describe "Worker doing nothing when started many times" do

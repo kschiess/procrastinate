@@ -36,13 +36,14 @@ class Procrastinate::ProcessManager
       event(:start) { transition :new => :running }
       event(:died)  { transition :running => :dead }
       
-      after_transition :on => :died, :do => :call_completion_handler
+      after_transition :on => :died, :do => :call_completion_handlers
     end
     
     # Calls the completion handler for the child. This is triggered by the
     # transition into the 'dead' state. 
     #
-    def call_completion_handler
+    def call_completion_handlers
+      result.process_died if result
       handler.call if handler
     end
         
@@ -122,16 +123,14 @@ class Procrastinate::ProcessManager
     cp_read_end = control_pipe.first
     
     loop do # until we have input in the cp_read_end (control_pipe)
-      # Returns array<ready_for_read, ..., ...>
       ready = Endpoint.select([cp_read_end, @cmc_server])
       
-      if ready.include? @cmc_server
-        read_child_messages
-      end
+      read_child_messages if ready.include? @cmc_server
 
       # Kill children here, since we've just depleted the communication
-      # endpoint. This avoids communication to children that aren't there
-      # anymore.
+      # endpoint. This avoids the situation where the child process
+      # communicates but we remove it from our records before it can be told
+      # about it.
       kill_children
       
       if ready.include? cp_read_end

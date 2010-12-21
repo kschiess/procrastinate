@@ -1,5 +1,10 @@
 
 module Procrastinate
+  # Raised when you try to access a future value that belongs to a process
+  # that died before producing a value. 
+  #
+  class ChildDeath < StandardError; end
+  
   autoload :Lock,     'procrastinate/lock'
   autoload :Runtime,  'procrastinate/runtime'
   autoload :IPC,      'procrastinate/ipc'
