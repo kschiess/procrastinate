@@ -16,9 +16,12 @@ module Procrastinate::IPC::Endpoint
     # This maps real system IO instances to wrapper objects. Return the thing
     # to the right if IO.select returns the thing to the left. 
     mapping = Hash.new
+    waiting = []
     
     read_array.each { |io_or_endpoint| 
       if io_or_endpoint.respond_to?(:select_ios)
+        waiting << io_or_endpoint if io_or_endpoint.waiting?
+        
         io_or_endpoint.select_ios.each do |io|
           mapping[io] = io_or_endpoint
         end
@@ -26,6 +29,8 @@ module Procrastinate::IPC::Endpoint
         mapping[io_or_endpoint] = io_or_endpoint
       end
     }
+    
+    return waiting unless waiting.empty?
     
     system_io = IO.select(mapping.keys, nil, nil, timeout)
     if system_io

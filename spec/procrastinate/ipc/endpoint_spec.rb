@@ -49,5 +49,16 @@ describe Procrastinate::IPC::Endpoint do
       result.should have(1).parts
       result.should include(r)
     end 
+    context "when messages are waiting" do
+      before(:each) { 
+        client.send "A"
+        client.send "B"
+        server.receive
+      }
+      it "should immediately return that endpoint" do
+        other = Endpoint.anonymous
+        Endpoint.select([server, other.server], 0.1).should include(server)
+      end
+    end
   end
 end
