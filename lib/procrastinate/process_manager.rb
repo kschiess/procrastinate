@@ -1,4 +1,6 @@
 
+require 'state_machine'
+
 # Dispatches and handles tasks and task completion. Only low level unixy
 # manipulation here, no strategy. The only methods you should call from the
 # outside are #setup, #step, #wakeup and #shutdown. 
@@ -29,13 +31,21 @@ class Procrastinate::ProcessManager
   # a child exits and the object that will handle child-master communication
   # if desired.
   #
-  class Child < Struct.new(:handler, :result)
-    # Calls the completion handler if there is one. 
-    #
-    def you_are_dead
-      handler.call if handler
+  class Child < Struct.new(:handler, :result, :state)
+    state_machine :state, :initial => :new do
+      event(:start) { transition :new => :running }
+      event(:died)  { transition :running => :dead }
+      
+      after_transition :on => :died, :do => :call_completion_handler
     end
     
+    # Calls the completion handler for the child. This is triggered by the
+    # transition into the 'dead' state. 
+    #
+    def call_completion_handler
+      handler.call if handler
+    end
+        
     # Handles incoming messages from the tasks process.
     #
     def incoming_message(obj)
@@ -44,9 +54,11 @@ class Procrastinate::ProcessManager
   end
   
   def initialize
+    # This controls process manager wakeup
     @control_pipe = IO.pipe
+    
+    # All presently running children
     @children = {}
-    @stop_requested = false
     
     # Child Master Communication (cmc)
     endpoint = Endpoint.anonymous
@@ -112,28 +124,49 @@ class Procrastinate::ProcessManager
     loop do # until we have input in the cp_read_end (control_pipe)
       # Returns array<ready_for_read, ..., ...>
       ready = Endpoint.select([cp_read_end, @cmc_server])
-    
-      ready.each do |io|
-        if io == cp_read_end
-          # Consume the data (not important)
-          cp_read_end.read_nonblock(1024)
-          return
-        else
-          msg = @cmc_server.receive
-          handle_child_message(msg)
-        end
+      
+      if ready.include? @cmc_server
+        read_child_messages
+      end
+      
+      # Kill children here, since we've just depleted the communication
+      # endpoint. This avoids communication to children that aren't there
+      # anymore.
+      kill_children
+      
+      if ready.include? cp_read_end
+        p :control_message
+        # Consume the data (not important)
+        cp_read_end.read_nonblock(1024)
+        return
       end
     end
 
   # rescue Errno::EAGAIN, Errno::EINTR
+    # TODO Is this needed?
     # A signal has been received. Mostly, this is as if we had received
     # something in the control pipe.
+  end
+  
+  def kill_children
+    children.delete_if { |pid, child| child.dead? }
+  end
+
+  # Once the @cmc_server endpoint is ready, loops and reads all child communication. 
+  #
+  def read_child_messages
+    loop do
+      msg = @cmc_server.receive
+      decode_and_handle_message(msg)
+      
+      break unless @cmc_server.waiting?
+    end
   end
   
   # Called for every message sent from a child. The +msg+ param here is a string
   # that still needs decoding. 
   #
-  def handle_child_message(msg)
+  def decode_and_handle_message(msg)
     pid, obj = Marshal.load(msg)
     if child=children[pid]
       child.incoming_message(obj)
@@ -149,18 +182,16 @@ class Procrastinate::ProcessManager
   #     
   def reap_childs
     loop do
-      child_pid, status = Process.waitpid2(-1, Process::WNOHANG)
+      child_pid, status = Process.waitpid(-1, Process::WNOHANG)
       break unless child_pid
-      
+
       # Trigger the completion callback
-      child = children.delete(child_pid)
-      child.you_are_dead
+      if child=children[child_pid]
+        child.died 
+      end
     end
   rescue Errno::ECHILD
     # Ignore: This means that no childs remain. 
-    unless children.empty?
-      fail "Received ECHILD - no childs left, but some handlers remain uncalled!"
-    end
   end
   
   # Spawns a process to work on +task+. If a block is given, it is called
@@ -179,12 +210,12 @@ class Procrastinate::ProcessManager
     pid = fork do
       cleanup
       
-      if result
-        endpoint = ObjectEndpoint.new(@cmc_client, Process.pid)
-        task.run(endpoint)
-      else
+      # if result
+      #   endpoint = ObjectEndpoint.new(@cmc_client, Process.pid)
+      #   task.run(endpoint)
+      # else
         task.run(nil)
-      end
+      # end
 
       exit! # this seems to be needed to avoid rspecs cleanup tasks
     end
@@ -192,7 +223,7 @@ class Procrastinate::ProcessManager
     # The spawning is done in the same thread as the reaping is done. This is 
     # why no race condition to the following line exists. (or in other code, 
     # for that matter.)
-    children[pid] = Child.new(completion_handler, result)
+    children[pid] = Child.new(completion_handler, result).tap { |s| s.start }
   end
   
   # Gets executed in child process to clean up file handles and pipes that the

@@ -11,6 +11,7 @@ GEM
     rspec-expectations (2.3.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.3.0)
+    state_machine (0.9.4)
 
 PLATFORMS
   ruby
@@ -18,3 +19,4 @@ PLATFORMS
 DEPENDENCIES
   flexmock
   rspec
+  state_machine

@@ -26,7 +26,7 @@ class Procrastinate::Task::MethodCall
   #
   def run(endpoint)
     r = @i.send(@m, *@a, &@b)
-    endpoint.send r
+    endpoint.send r if endpoint
   end
   
   def result

@@ -99,26 +99,45 @@ private
       strategy.notify_spawn
     end
   end
+  
+  # This is the content of the control thread that is spawned with
+  # #start_thread
+  #
+  def run
+    # Start dispatchers work
+    dispatcher.setup
+
+    # Loop until someone requests a shutdown.
+    loop do
+puts "Stepping"
+      dispatcher.step
+
+      break if @state == :real_shutdown
+puts "Spawning new ones..."
+      spawn
+    end
+
+    dispatcher.teardown
+  rescue => ex
+    # Sometimes exceptions vanish silently. This will avoid that, even though
+    # they should abort the whole process.
+    
+    warn "Exception #{ex.inspect} caught."
+    ex.backtrace.first(5).each do |line|
+      warn line
+    end
+    
+    raise
+  end
 
   # Hosts the control thread that runs in parallel with your code. This thread
   # handles child spawning and reaping. 
   #
   def start_thread # :nodoc: 
+    Thread.abort_on_exception = true
+    
     @thread = Thread.new do
-      Thread.current.abort_on_exception = true
-      
-      # Start dispatchers work
-      dispatcher.setup
-
-      # Loop until someone requests a shutdown.
-      loop do
-        dispatcher.step
-
-        break if @state == :real_shutdown
-        spawn
-      end
-
-      dispatcher.teardown
+      run
     end
   end
 end
