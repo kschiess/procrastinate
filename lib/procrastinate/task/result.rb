@@ -6,7 +6,8 @@ require 'thread'
 #
 class Procrastinate::Task::Result
   def initialize
-    @pipe           = IO.pipe
+    @result_ready   = ConditionVariable.new
+    @result_mutex   = Mutex.new
     
     @value_ready    = false
     @value          = nil
@@ -57,12 +58,15 @@ private
   #
   def wait_for_value
     return if ready?    # quick return for clear cases
-    IO.select [@pipe.first]
+
+    @result_mutex.synchronize do
+      @result_ready.wait(@result_mutex)
+    end
   end
   
   # Tells all waiting threads that ready? is now true.
   #
   def signal_ready
-    @pipe.last.write '.'
+    @result_ready.broadcast
   end
 end
