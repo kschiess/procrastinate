@@ -1,55 +1,12 @@
 
-require 'thread'
+require 'procrastinate/utils'
 
 # A single value result, like from a normal method call. Return an instance of
 # this from your task#result method to enable result handling. 
 #
 class Procrastinate::Task::Result
-  class OneTimeFlag
-    def initialize
-      @waiting   = []
-      @waiting_m = Mutex.new
-      @set       = false
-    end
-    
-    # If the flag is set, does nothing. If it isn't, it blocks until the flag
-    # is set. 
-    def wait
-      return if set?
-      
-      @waiting_m.synchronize do
-        @waiting << Thread.current
-        @waiting_m.sleep(0.001) until set?
-      end
-    end
-    
-    # Sets the flag and releases all waiting threads.
-    #
-    def set
-      @set = true
-      @waiting_m.synchronize do
-        @waiting.each { |t| t.run }
-        @waiting = [] # cleanup
-      end
-    end
-    
-    # Non blocking: Is the flag set?
-    #
-    def set?
-      @set
-    end
-    
-    if RUBY_VERSION =~ /^1.8/
-      def wait
-      end
-      
-      def signal
-      end
-    end
-  end
-  
   def initialize
-    @value_ready    = OneTimeFlag.new
+    @value_ready    = Procrastinate::Utils::OneTimeFlag.new
     @value          = nil
     @exception      = false
   end
