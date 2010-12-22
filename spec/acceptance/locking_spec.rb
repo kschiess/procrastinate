@@ -52,13 +52,13 @@ describe "Scheduling 100 processes that fight for the same lock" do
   end
   
   context "resulting lock acquisition sequence" do
-    subject {
-      read_end.read.each_char.map { |c| c=='l' ? :lock : :unlock }
+    let(:sequence) {
+      read_end.read_nonblock(200).each_char.map { |c| c=='l' ? :lock : :unlock }
     }
     
-    its(:size) { should == 200 }
-    it "should not contain the sequence :lock, :lock" do
-      subject.each_cons(2).to_a.should_not include([:lock, :lock])
-    end
+    it "should have 200 elements and no consecutive :lock -> :lock" do
+      sequence.should have(200).elements
+      sequence.each_cons(2).to_a.should_not include([:lock, :lock])
+    end 
   end
 end
