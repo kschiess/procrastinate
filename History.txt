@@ -1,6 +1,9 @@
 = 0.2.0 
   * Big rewrite, trying to make things more clear. Also: There might be more
     features lurking in there.
+    
+  * All proxy method calls now have a return value that works like a future: 
+    Access to the real return value through future.value, which might block.
 
 = 0.1.0 / 10Dez2010
   * Initial version
