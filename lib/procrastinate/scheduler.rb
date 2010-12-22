@@ -83,8 +83,6 @@ class Procrastinate::Scheduler
     manager.wakeup
     # Wait for the manager to finish its work. This waits for child processes
     # and then reaps their result, avoiding zombies. 
-    # TODO There is a deadlock here: If the control thread waits inside 
-    # queue.pop and we do a thread join, Ruby will throw a deadlock.
     @thread.join
   end
   
