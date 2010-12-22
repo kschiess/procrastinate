@@ -68,8 +68,9 @@ break. This is the real world.
 
 STATUS
 
-This code is not released as a gem yet. Once we iron out the bugs we'll 
-release it as 0.1.0. Alpha quality code. 
+We're still adding features that we believe must be in 1.0. What is there 
+mostly works; Multi-{Processing, Threading} is always a difficult topic and
+we're glad to receive bug reports.  
 
 Please see the LICENSE file for license information. 
 
