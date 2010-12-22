@@ -93,10 +93,10 @@ private
   def spawn
     while strategy.should_spawn? && !task_queue.empty?
       task = task_queue.pop
+      strategy.notify_spawn
       manager.create_process(task) do
         strategy.notify_dead
       end
-      strategy.notify_spawn
     end
   end
   
