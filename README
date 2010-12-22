@@ -54,17 +54,17 @@ The above example will output something like
 
 COMPATIBILITY
 
-This library runs with at least Ruby 1.8.7 and Ruby 1.9. For running it with 
-Ruby 1.9, you need to patch it with the patch found at 
-
-  http://redmine.ruby-lang.org/issues/show/1525
-  
-or run it with at least r25844 of Ruby trunk.
+This library runs with at least Ruby 1.8.7 and Ruby 1.9. Ruby 1.9 support
+might be spotty, because the threading primitives in Ruby 1.9 are still 
+somewhat buggy. 
 
 KNOWN BUGS
 
 Due to the way we handle signal traps, you cannot start more than one
 Scheduler. We might allow that in the future. 
+
+Also: signal traps interact with other libraries and might cause things to 
+break. This is the real world. 
 
 STATUS
 
