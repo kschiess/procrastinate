@@ -14,7 +14,7 @@ describe "Scheduling 100 processes that fight for the same lock" do
     def do
       runtime.lock('l1') do
         write_end.print 'l'
-        sleep 0.0001
+        sleep 0.00001 * rand(10)
         write_end.print 'u'
       end
     end
