@@ -5,11 +5,51 @@ require 'thread'
 # this from your task#result method to enable result handling. 
 #
 class Procrastinate::Task::Result
-  def initialize
-    @result_ready   = ConditionVariable.new
-    @result_mutex   = Mutex.new
+  class OneTimeFlag
+    def initialize
+      @waiting   = []
+      @waiting_m = Mutex.new
+      @set       = false
+    end
     
-    @value_ready    = false
+    # If the flag is set, does nothing. If it isn't, it blocks until the flag
+    # is set. 
+    def wait
+      return if set?
+      
+      @waiting_m.synchronize do
+        @waiting << Thread.current
+        @waiting_m.sleep(0.001) until set?
+      end
+    end
+    
+    # Sets the flag and releases all waiting threads.
+    #
+    def set
+      @set = true
+      @waiting_m.synchronize do
+        @waiting.each { |t| t.run }
+        @waiting = [] # cleanup
+      end
+    end
+    
+    # Non blocking: Is the flag set?
+    #
+    def set?
+      @set
+    end
+    
+    if RUBY_VERSION =~ /^1.8/
+      def wait
+      end
+      
+      def signal
+      end
+    end
+  end
+  
+  def initialize
+    @value_ready    = OneTimeFlag.new
     @value          = nil
     @exception      = false
   end
@@ -20,9 +60,7 @@ class Procrastinate::Task::Result
     return if ready?
     
     @value = obj
-    @value_ready = true
-    
-    signal_ready
+    @value_ready.set
   end
   
   # Notifies this result that the process has died. If this happens before
@@ -32,14 +70,12 @@ class Procrastinate::Task::Result
   def process_died
     return if ready?
     
-    @exception = true
-    @value_ready = true
-    
-    signal_ready
+    @exception = true    
+    @value_ready.set
   end
 
   def value
-    wait_for_value
+    @value_ready.wait
     
     if @exception
       raise Procrastinate::ChildDeath, "Child process died before producing a value."
@@ -49,24 +85,6 @@ class Procrastinate::Task::Result
   end
   
   def ready?
-    @value_ready
-  end
-  
-private
-  # Puts the thread to sleep and queues it into @wakeup. Only wake up once
-  # ready? is true.
-  #
-  def wait_for_value
-    return if ready?    # quick return for clear cases
-
-    @result_mutex.synchronize do
-      @result_ready.wait(@result_mutex)
-    end
-  end
-  
-  # Tells all waiting threads that ready? is now true.
-  #
-  def signal_ready
-    @result_ready.broadcast
+    @value_ready.set?
   end
 end
