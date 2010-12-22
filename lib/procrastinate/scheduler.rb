@@ -87,9 +87,9 @@ class Procrastinate::Scheduler
   end
   
 private
-  # Spawns new tasks (if needed). This is only ever called from the control
-  # thread (see below). 
-  # 
+  # Spawns new tasks (if needed). 
+  #   *control thread* 
+  #
   def spawn
     while strategy.should_spawn? && !task_queue.empty?
       task = task_queue.pop
@@ -102,6 +102,7 @@ private
   
   # This is the content of the control thread that is spawned with
   # #start_thread
+  #   *control thread* 
   #
   def run
     # Start managers work

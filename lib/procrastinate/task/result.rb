@@ -12,6 +12,7 @@ class Procrastinate::Task::Result
   end
   
   # Gets passed all messages sent by the child process for this task.
+  #   *control thread* 
   #
   def incoming_message(obj)
     return if ready?
@@ -23,6 +24,7 @@ class Procrastinate::Task::Result
   # Notifies this result that the process has died. If this happens before
   # a process result is passed to #incoming_message, that message will never
   # arrive. 
+  #   *control thread* 
   #
   def process_died
     return if ready?
