@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Procrastinate::IPC::Endpoint do
-  include Procrastinate::IPC
+  Endpoint = Procrastinate::IPC::Endpoint
   
   # Eventually, this API might look like this: 
   # 
