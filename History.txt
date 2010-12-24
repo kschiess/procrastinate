@@ -1,4 +1,10 @@
-= 0.2.0 
+= 0.3.0 / not released
+  * create_proxy is now just 'proxy' to friends. This looks cleaner. 
+  
+  * require 'procrastinate/implicit' allows ignoring the scheduler in daily
+    usage. This is probably what will be more common. 
+
+= 0.2.0 / 22Dez2010
   * Big rewrite, trying to make things more clear. Also: There might be more
     features lurking in there.
     
@@ -6,4 +12,5 @@
     Access to the real return value through future.value, which might block.
 
 = 0.1.0 / 10Dez2010
+
   * Initial version
