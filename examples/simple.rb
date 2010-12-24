@@ -12,7 +12,7 @@ class Worker
 end
 
 scheduler = Procrastinate::Scheduler.start
-worker = scheduler.create_proxy(Worker.new)
+worker = scheduler.proxy(Worker.new)
 
 10.times do 
   worker.do_work

@@ -13,7 +13,7 @@ class Worker
 end
 
 scheduler = Scheduler.start(SpawnStrategy::Throttled.new(5))
-worker = scheduler.create_proxy(Worker.new)
+worker = scheduler.proxy(Worker.new)
 
 10.times do 
   worker.do_work

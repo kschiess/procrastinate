@@ -17,7 +17,7 @@ end
 
 Procrastinate::Lock.base = '/tmp'   # This will have to be moved into scheduler
 scheduler = Procrastinate::Scheduler.start
-worker = scheduler.create_proxy(Worker.new(scheduler.runtime))
+worker = scheduler.proxy(Worker.new(scheduler.runtime))
 
 10.times do 
   worker.do_work

@@ -23,7 +23,7 @@ module Procrastinate
   #   r.value   # => 'foobar'
   #
   def proxy(obj)
-    scheduler.create_proxy(obj)
+    scheduler.proxy(obj)
   end
   module_function :proxy
   

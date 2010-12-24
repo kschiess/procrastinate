@@ -4,7 +4,7 @@
 class Procrastinate::Proxy
   # Create a new proxy class. +worker+ is an instance of the class that we 
   # want to perform work in, +scheduler+ is where the work will be scheduled. 
-  # Don't call this on your own, instead use Scheduler#create_proxy. 
+  # Don't call this on your own, instead use Scheduler#proxy. 
   #
   def initialize(worker, scheduler) # :nodoc: 
     @worker = worker

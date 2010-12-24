@@ -25,7 +25,7 @@ describe "Throttled strategy (:limit => 4) when given 8 tasks" do
     trigger_read, @trigger_write = IO.pipe
 
     # Schedule 8 tasks that all get the write end of the pipe. 
-    task = scheduler.create_proxy(Task.new(log_write, trigger_read))
+    task = scheduler.proxy(Task.new(log_write, trigger_read))
     8.times do
       task.run
     end

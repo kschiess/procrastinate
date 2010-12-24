@@ -39,10 +39,10 @@ class Procrastinate::Scheduler
   #
   # Example: 
   #
-  #   proxy = scheduler.create_proxy(worker)
+  #   proxy = scheduler.proxy(worker)
   #   status = proxy.do_some_work    # will execute later and in its own process
   #
-  def create_proxy(worker)
+  def proxy(worker)
     return Procrastinate::Proxy.new(worker, self)
   end
   
