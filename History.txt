@@ -6,6 +6,10 @@
     
   * Auto-detection of the number of cores procrastinate runs on.    
     (SpawnStrategy::Default)
+    
+  * Ruby 1.8 now uses absolutely poor busy-loop synchs. This is still better
+    than inserting puts in the code to unblock some magical mystical internal
+    state. I'll try to find a better solution. 
 
 = 0.2.0 / 22Dez2010
   * Big rewrite, trying to make things more clear. Also: There might be more
