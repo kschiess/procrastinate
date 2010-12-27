@@ -2,14 +2,14 @@
 
 Gem::Specification.new do |s|
   s.name = %q{procrastinate}
-  s.version = "0.2.0"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kaspar Schiess", "Patrick Marchi"]
-  s.date = %q{2010-12-22}
+  s.date = %q{2010-12-27}
   s.email = ["kaspar.schiess@absurd.li", "mail@patrickmarchi.ch"]
   s.extra_rdoc_files = ["README"]
-  s.files = ["LICENSE", "Rakefile", "README", "spec", "lib/procrastinate", "lib/procrastinate/ipc", "lib/procrastinate/ipc/endpoint.rb", "lib/procrastinate/ipc.rb", "lib/procrastinate/lock.rb", "lib/procrastinate/process_manager.rb", "lib/procrastinate/proxy.rb", "lib/procrastinate/runtime.rb", "lib/procrastinate/scheduler.rb", "lib/procrastinate/spawn_strategy", "lib/procrastinate/spawn_strategy/simple.rb", "lib/procrastinate/spawn_strategy/throttled.rb", "lib/procrastinate/spawn_strategy.rb", "lib/procrastinate/task", "lib/procrastinate/task/method_call.rb", "lib/procrastinate/task/result.rb", "lib/procrastinate/task.rb", "lib/procrastinate.rb"]
+  s.files = ["LICENSE", "Rakefile", "README", "spec", "lib/procrastinate", "lib/procrastinate/implicit.rb", "lib/procrastinate/ipc", "lib/procrastinate/ipc/endpoint.rb", "lib/procrastinate/ipc.rb", "lib/procrastinate/lock.rb", "lib/procrastinate/process_manager.rb", "lib/procrastinate/proxy.rb", "lib/procrastinate/runtime.rb", "lib/procrastinate/scheduler.rb", "lib/procrastinate/spawn_strategy", "lib/procrastinate/spawn_strategy/simple.rb", "lib/procrastinate/spawn_strategy/throttled.rb", "lib/procrastinate/spawn_strategy.rb", "lib/procrastinate/task", "lib/procrastinate/task/method_call.rb", "lib/procrastinate/task/result.rb", "lib/procrastinate/task.rb", "lib/procrastinate/utils", "lib/procrastinate/utils/one_time_flag.rb", "lib/procrastinate/utils/one_time_flag_ruby18_shim.rb", "lib/procrastinate/utils.rb", "lib/procrastinate.rb"]
   s.homepage = %q{http://github.com/kschiess/procrastinate}
   s.rdoc_options = ["--main", "README"]
   s.require_paths = ["lib"]
