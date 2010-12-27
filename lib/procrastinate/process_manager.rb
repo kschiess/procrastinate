@@ -8,6 +8,9 @@ require 'state_machine'
 class Procrastinate::ProcessManager
   include Procrastinate::IPC
   
+  autoload :ObjectEndpoint, 'procrastinate/process_manager/object_endpoint'
+  autoload :ChildProcess,   'procrastinate/process_manager/child_process'
+  
   # This pipe is used to wait for events in the master process. 
   attr_reader :control_pipe
   
@@ -15,45 +18,7 @@ class Procrastinate::ProcessManager
   # processes we spawn. Once the process is complete, the callback is called
   # in the procrastinate thread.
   attr_reader :children
-  
-  # A class that acts as a filter between ProcessManager and the endpoint it
-  # uses to communicate with its children. This converts Ruby objects into
-  # Strings and also sends process id. 
-  #
-  class ObjectEndpoint < Struct.new(:endpoint, :pid)
-    def send(obj)
-      msg = Marshal.dump([pid, obj])
-      endpoint.send(msg)
-    end
-  end
-  
-  # A <completion handler, result> tuple that stores the handler to call when
-  # a child exits and the object that will handle child-master communication
-  # if desired.
-  #
-  class Child < Struct.new(:handler, :result, :state)
-    state_machine :state, :initial => :new do
-      event(:start) { transition :new => :running }
-      event(:died)  { transition :running => :dead }
       
-      after_transition :on => :died, :do => :call_completion_handlers
-    end
-    
-    # Calls the completion handler for the child. This is triggered by the
-    # transition into the 'dead' state. 
-    #
-    def call_completion_handlers
-      result.process_died if result
-      handler.call if handler
-    end
-        
-    # Handles incoming messages from the tasks process.
-    #
-    def incoming_message(obj)
-      result.incoming_message(obj) if result
-    end
-  end
-  
   def initialize
     # This controls process manager wakeup
     @control_pipe = IO.pipe
@@ -99,6 +64,14 @@ class Procrastinate::ProcessManager
     control_pipe.last.write '.'
   # rescue IOError
     # Ignore:
+  end
+  
+  # Returns the number of child processes that are alive at this point. Note
+  # that even if a child process is marked dead internally, it counts towards
+  # this number, since its results may not have been dispatched yet. 
+  # 
+  def process_count
+    children.count
   end
   
   # Internal methods below this point. ---------------------------------------
@@ -221,7 +194,7 @@ class Procrastinate::ProcessManager
     # The spawning is done in the same thread as the reaping is done. This is 
     # why no race condition to the following line exists. (or in other code, 
     # for that matter.)
-    children[pid] = Child.new(completion_handler, result).tap { |s| s.start }
+    children[pid] = ChildProcess.new(completion_handler, result).tap { |s| s.start }
   end
   
   # Gets executed in child process to clean up file handles and pipes that the

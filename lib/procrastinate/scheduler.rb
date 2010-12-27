@@ -65,17 +65,31 @@ class Procrastinate::Scheduler
     manager.wakeup
   end
   
+  # Waits for the currently queued work to complete. This can be used at the
+  # end of short scripts to ensure that all work is done. 
+  #
+  def join
+    @state = :soft_shutdown
+    
+    # NOTE: Currently, this method busy-loops until all childs terminate. 
+    # This is not as elegant as I whish it to be, but its a start. 
+    
+    # Wait until all tasks are done.
+    loop do
+      manager.wakeup
+      break if task_queue.empty? && manager.process_count==0
+      sleep 0.01
+    end
+    
+  ensure
+    @state = :running
+  end
+  
   # Immediately shuts down the procrastinate thread and frees resources. 
   # If there are any tasks left in the queue, they will NOT be executed. 
   #
   def shutdown(hard=false)
-    unless hard
-      @state = :soft_shutdown
-      loop do
-        manager.wakeup
-        break if task_queue.empty?
-      end
-    end
+    join unless hard
     
     # Set the flag that will provoke shutdown
     @state = :real_shutdown

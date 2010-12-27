@@ -1,4 +1,6 @@
 
+require 'procrastinate'
+
 module Procrastinate
   # call-seq:
   #   Procrastinate.scheduler => scheduler
@@ -26,6 +28,24 @@ module Procrastinate
     scheduler.proxy(obj)
   end
   module_function :proxy
+  
+  # call-seq: 
+  #   Procrastinate.join
+  #
+  # Waits for all currently scheduled tasks to complete. This is like calling
+  # #value on all result objects, except that nothing is returned.
+  #
+  # Example: 
+  #
+  #   proxy = Procrastinate.proxy("foo")
+  #   r     = proxy += "bar"
+  #   Procrastinate.join
+  #   r.ready? # => true
+  #
+  def join
+    scheduler.join
+  end
+  module_function :join
   
   # Internal method: You should not have to shutdown the scheduler manually
   # since it consumes almost no resources when not active. This is mainly

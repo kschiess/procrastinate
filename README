@@ -4,13 +4,13 @@ INTRO
 to concentrate on what to run when, not orchestration of low level details. 
 
 This library will be ideal for quickly scheduling of a lot of long running
-tasks. You can easily control how many processes are run at any time. To get
-at/cron like scheduling, combine this library with 'rufus-scheduler'. 
+tasks. You can easily control how many processes are run at any time. Your 
+main thread can continue to do useful work until it accesses the results of
+the computation, at which point it will wait for the processes to finish. 
 
 SYNOPSIS
 
-  require 'procrastinate'
-  include Procrastinate
+  require 'procrastinate/implicit'
 
   class Worker
     def do_work
@@ -20,43 +20,42 @@ SYNOPSIS
     end
   end
 
-  scheduler = Scheduler.start(SpawnStrategy::Throttled.new(5))
-  worker = scheduler.proxy(Worker.new)
+  worker = Procrastinate.proxy(Worker.new)
 
   10.times do 
     worker.do_work
   end
 
-  scheduler.shutdown
-  
+  Procrastinate.join
+
 The above example will output something like 
 
-  > Starting work in process 6651
-  > Starting work in process 6652
-  > Starting work in process 6653
-  > Starting work in process 6654
-  > Starting work in process 6655
-  < Work completed in process 6651
-  < Work completed in process 6652
-  < Work completed in process 6653
-  < Work completed in process 6654
-  < Work completed in process 6655
-  > Starting work in process 6659
-  > Starting work in process 6660
-  > Starting work in process 6656
-  > Starting work in process 6657
-  > Starting work in process 6658
-  < Work completed in process 6659
-  < Work completed in process 6660
-  < Work completed in process 6656
-  < Work completed in process 6657
-  < Work completed in process 6658
+  > Starting work in process 56144
+  > Starting work in process 56145
+  > Starting work in process 56146
+  > Starting work in process 56147
+  > Starting work in process 56148
+  > Starting work in process 56149
+  < Work completed in process 56144
+  < Work completed in process 56145
+  < Work completed in process 56146
+  < Work completed in process 56147
+  < Work completed in process 56148
+  < Work completed in process 56149
+  > Starting work in process 56150
+  > Starting work in process 56151
+  > Starting work in process 56152
+  > Starting work in process 56153
+  < Work completed in process 56150
+  < Work completed in process 56151
+  < Work completed in process 56152
+  < Work completed in process 56153
+  
+(The output depends on the number of cores your machine has)
 
 COMPATIBILITY
 
-This library runs with at least Ruby 1.8.7 and Ruby 1.9. Ruby 1.9 support
-might be spotty, because the threading primitives in Ruby 1.9 are still 
-somewhat buggy. 
+This library runs with at least Ruby 1.8.7 and Ruby 1.9. 
 
 KNOWN BUGS
 
