@@ -1,4 +1,4 @@
-= 0.3.0 / not released
+= 0.3.0 / 27Dez2010
   * create_proxy is now just 'proxy' to friends. This looks cleaner. 
   
   * require 'procrastinate/implicit' allows ignoring the scheduler in daily
