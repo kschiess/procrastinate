@@ -14,7 +14,7 @@ class Procrastinate::Scheduler
   attr_reader :task_queue
     
   def initialize(strategy)
-    @strategy   = strategy || Procrastinate::SpawnStrategy::Simple.new
+    @strategy   = strategy || Procrastinate::SpawnStrategy::Default.new
     @manager = Procrastinate::ProcessManager.new
 
     # State takes three values: :running, :soft_shutdown, :real_shutdown
