@@ -1,7 +1,5 @@
 class Procrastinate::Utils::OneTimeFlag
   def initialize
-    @waiting_m  = Mutex.new
-    @waiting_cv = ConditionVariable.new
     @set        = false
   end
   
@@ -10,18 +8,13 @@ class Procrastinate::Utils::OneTimeFlag
   def wait
     return if set?
     
-    @waiting_m.synchronize do
-      @waiting_cv.wait(@waiting_m)
-    end
+    sleep(0.01) until set?
   end
   
   # Sets the flag and releases all waiting threads.
   #
   def set
     @set = true
-    @waiting_m.synchronize do
-      @waiting_cv.broadcast
-    end
   end
   
   # Non blocking: Is the flag set?
