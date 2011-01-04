@@ -57,6 +57,9 @@ COMPATIBILITY
 
 This library runs with at least Ruby 1.8.7 and Ruby 1.9. 
 
+Ruby 1.9 users might try this patch: 
+https://gist.github.com/762807
+
 KNOWN BUGS
 
 Due to the way we handle signal traps, you cannot start more than one
