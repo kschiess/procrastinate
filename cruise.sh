@@ -14,4 +14,4 @@ fi
 rvm 1.9.2-p0@procrastinate
 yes 'yes' | rvm gemset empty
 bundle install
-rake cruise
+rake
