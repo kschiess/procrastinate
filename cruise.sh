@@ -11,7 +11,7 @@ else
   printf "ERROR: An RVM installation was not found.\n"
 fi
 
-rvm 1.9.2-p0@procrastinate
+rvm 1.9.2-p136@procrastinate
 yes 'yes' | rvm gemset empty
 bundle install
 rake
