@@ -19,5 +19,8 @@ describe "Implicit usage / when not starting Procrastinate by hand" do
     it "should wait for all tasks to complete" do
       results.count { |r| r.ready? }.should == 10
     end 
+    
+    # Provides test isolation
+    after(:each) { Procrastinate.reset }
   end
 end

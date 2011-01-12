@@ -55,4 +55,13 @@ module Procrastinate
     scheduler.shutdown
   end
   module_function :shutdown
+  
+  # Resets the implicit scheduler. Please use this only in tests, not in
+  # production code. 
+  #
+  def reset
+    scheduler.shutdown
+    @scheduler = nil
+  end
+  module_function :reset
 end

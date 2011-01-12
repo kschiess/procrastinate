@@ -12,11 +12,12 @@ describe "Implicit use of the scheduler", :type => :acceptance do
   context "when scheduling through Procrastinate module" do
     let(:proxy) { Procrastinate.proxy(ImplicitSpecWorker.new) }
     subject { proxy.do_something }
+    before(:each) { subject }
     
     its(:value) { should == 'bar' }
     
     # Normally, the user would not do this. We do it here because our tests
     # need isolation. 
-    after(:each) { Procrastinate.shutdown }
+    after(:each) { Procrastinate.reset }
   end
 end
