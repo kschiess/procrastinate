@@ -19,8 +19,8 @@ class Procrastinate::SpawnStrategy::Default < Procrastinate::SpawnStrategy::Thro
       
     # Mac OS X 
     if File.exist?('/usr/sbin/system_profiler')
-      output = `system_profiler SPHardwareDataType | grep "Total Number Of Cores"`
-      if md=output.match(%r(Total Number Of Cores: (\d+)))
+      output = `system_profiler SPHardwareDataType | grep "Total Number [oO]f Cores"`
+      if md=output.match(%r(Total Number [oO]f Cores: (\d+)))
         return Integer(md[1])
       end
     end
