@@ -57,10 +57,8 @@ COMPATIBILITY
 
 This library runs with at least Ruby 1.8.7 and Ruby 1.9. 
 
-Ruby 1.9 users must use this patch: 
+Ruby 1.9-p136 users must use this patch: 
 https://gist.github.com/762807
-
-The change is in master, but not in p136.
 
 KNOWN BUGS
 

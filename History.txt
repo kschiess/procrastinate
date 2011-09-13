@@ -1,3 +1,7 @@
+= 0.3.1 / 13Sep2011 
+
+  ! fix processor detection for Mac OS X Lion
+
 = 0.3.0 / 27Dez2010
   * create_proxy is now just 'proxy' to friends. This looks cleaner. 
   
