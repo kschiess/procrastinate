@@ -15,9 +15,5 @@ describe "Implicit use of the scheduler", :type => :acceptance do
     before(:each) { subject }
     
     its(:value) { should == 'bar' }
-    
-    # Normally, the user would not do this. We do it here because our tests
-    # need isolation. 
-    after(:each) { Procrastinate.reset }
   end
 end
