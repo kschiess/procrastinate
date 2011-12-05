@@ -1,70 +1,41 @@
-require 'rspec'
+require "rubygems"
+require "rdoc/task"
 require 'rspec/core/rake_task'
-Rspec::Core::RakeTask.new
+require 'rubygems/package_task'
+
+desc "Run all tests: Exhaustive."
+RSpec::Core::RakeTask.new
+
 task :default => :spec
 
-require "rubygems"
-require "rake/gempackagetask"
-require "rake/rdoctask"
-
-# This builds the actual gem. For details of what all these options
-# mean, and other ones you can add, check the documentation here:
-#
-#   http://rubygems.org/read/chapter/20
-#
-spec = Gem::Specification.new do |s|
-
-  # Change these as appropriate
-  s.name              = "procrastinate"
-  s.version           = "0.3.1"
-  s.summary           = "Framework to run tasks in separate processes."
-  s.authors           = ['Kaspar Schiess', 'Patrick Marchi']
-  s.email             = ['kaspar.schiess@absurd.li', 'mail@patrickmarchi.ch']
-  s.homepage          = "http://github.com/kschiess/procrastinate"
-
-  s.has_rdoc          = true
-  s.extra_rdoc_files  = %w(README)
-  s.rdoc_options      = %w(--main README)
-
-  # Add any extra files to include in the gem
-  s.files             = %w(LICENSE Rakefile README) + Dir.glob("{spec,lib/**/*}")
-  s.require_paths     = ["lib"]
-
-  # If you want to depend on other gems, add them here, along with any
-  # relevant versions
-  s.add_dependency("state_machine", "~> 0.9.4")
-
-  # If your tests use any gems, include them here
-  s.add_development_dependency("rspec")
-  s.add_development_dependency("flexmock")
+task :stats do
+  %w(lib spec).each do |path|
+    printf "%10s:", path
+    system %Q(find #{path} -name "*.rb" | xargs wc -l | grep total)
+  end
 end
 
-desc "Regenerate the .gemspec file for github/bundler."
-task :gemspec do
-  # Generate the gemspec file for github.
-  file = File.dirname(__FILE__) + "/#{spec.name}.gemspec"
-  File.open(file, "w") {|f| f << spec.to_ruby }
-end
-
-# This task actually builds the gem. We also regenerate a static
-# .gemspec file, which is useful if something (i.e. GitHub) will
-# be automatically building a gem for this project. If you're not
-# using GitHub, edit as appropriate.
-#
-# To publish your gem online, install the 'gemcutter' gem; Read more 
-# about that here: http://gemcutter.org/pages/gem_docs
-Rake::GemPackageTask.new(spec) do |pkg|
-  pkg.gem_spec = spec
-end
+require 'sdoc'
 
 # Generate documentation
-Rake::RDocTask.new do |rd|
-  rd.main = "README"
-  rd.rdoc_files.include("README", "lib/**/*.rb")
-  rd.rdoc_dir = "rdoc"
+RDoc::Task.new do |rdoc|
+  rdoc.title    = "procrastinate - a framework to run tasks in separate processes."
+  rdoc.options << '--line-numbers'
+  rdoc.options << '--fmt' << 'shtml' # explictly set shtml generator
+  rdoc.template = 'direct' # lighter template used on railsapi.com
+  rdoc.main = "README"
+  rdoc.rdoc_files.include("README", "lib/**/*.rb")
+  rdoc.rdoc_dir = "rdoc"
 end
 
-desc 'Clear out RDoc and generated packages'
-task :clean => [:clobber_rdoc, :clobber_package] do
-  rm "#{spec.name}.gemspec"
+desc 'Clear out RDoc'
+task :clean => [:clobber_rdoc, :clobber_package]
+
+# This task actually builds the gem. 
+task :gem => :spec
+spec = eval(File.read('procrastinate.gemspec'))
+
+desc "Generate the gem package."
+Gem::PackageTask.new(spec) do |pkg|
+  # pkg.need_tar = true
 end
