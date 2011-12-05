@@ -1,8 +1,9 @@
 require 'spec_helper'
 
-require 'procrastinate/implicit'
-
 describe "Implicit usage / when not starting Procrastinate by hand" do
+  # Spec isolation
+  before(:each) { Procrastinate.reset }
+  
   class Worker
     def doit
       rand(100)

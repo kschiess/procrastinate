@@ -57,12 +57,22 @@ class Procrastinate::Scheduler
   # Called by the proxy to schedule work. You can implement your own Task
   # classes; the relevant interface consists of only a #run method. 
   #
-  def schedule(task)
+  def schedule(task=nil, &block)
     fail "Shutting down..." if @state != :running
+    
+    fail ArgumentError, "Either task or block must be given." \
+      if !task && !block
+    
+    if block
+      task = Procrastinate::Task::Callable.new(block)
+    end
+    
     task_queue << task
     
     # Create an occasion for spawning
     manager.wakeup
+    
+    task.result
   end
   
   # Waits for the currently queued work to complete. This can be used at the

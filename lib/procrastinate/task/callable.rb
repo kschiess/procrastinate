@@ -2,18 +2,11 @@
 require 'procrastinate/task/result'
 
 module Procrastinate::Task
-  # Constructs an object of type +klass+ and calls a method on it. 
+  # Calls the block and returns the result of execution. 
   #
-  class MethodCall
-    attr_reader :i
-    attr_reader :m
-    attr_reader :a
-    attr_reader :b
-  
-    def initialize(instance, method, arguments, block)
-      @i = instance
-      @m = method
-      @a = arguments
+  class Callable
+    attr_reader :block
+    def initialize(block)
       @b = block
     end
   
@@ -24,7 +17,7 @@ module Procrastinate::Task
     # from children to the master (and to the caller in this case).
     #
     def run(endpoint)
-      r = @i.send(@m, *@a, &@b)
+      r = @b.call
       endpoint.send r if endpoint
     end
   

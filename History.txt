@@ -1,3 +1,7 @@
+= 0.4.0 / ???
+
+  + Schedules blocks as well (Scheduler#schedule).
+
 = 0.3.1 / 13Sep2011 
 
   ! fix processor detection for Mac OS X Lion
