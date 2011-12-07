@@ -1,3 +1,17 @@
+
+# A flag that will allow threads to wait until it is set. Once it is set, it
+# cannot be unset. 
+#
+# Guarantees that this class tries to make:
+# 
+# 1) No thread will start waiting for the flag once it is already set. There 
+#    no set-hole, meaning that no thread goes to sleep while we're waking up
+#    threads because the flag has been set. 
+#
+# Candidate stdlib classes violate some of these guarantees, here are some 
+# candidates: 
+#   * ConditionVariable - violates 1)
+#
 class Procrastinate::Utils::OneTimeFlag
   def initialize
     @waiting   = []
