@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe "Block scheduling" do
+  after(:each) { scheduler.shutdown }
   let(:scheduler) { Procrastinate::Scheduler.start }
   
   it "runs blocks in another process" do

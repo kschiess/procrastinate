@@ -14,13 +14,14 @@ describe "Throttled strategy (:limit => 4) when given 8 tasks" do
       log.write('B')
     end
   end
+  
+  let(:scheduler) { Procrastinate::Scheduler.start(
+      Procrastinate::SpawnStrategy::Throttled.new(4)) }
+  after(:each) { scheduler.shutdown }
+
   attr_reader :log_read, :log_write
   attr_reader :trigger_write
-  attr_reader :scheduler
   before(:each) do
-    @scheduler = Procrastinate::Scheduler.start(
-      Procrastinate::SpawnStrategy::Throttled.new(4)) 
-      
     @log_read, @log_write = IO.pipe
     trigger_read, @trigger_write = IO.pipe
 
@@ -32,7 +33,6 @@ describe "Throttled strategy (:limit => 4) when given 8 tasks" do
   end
   after(:each) do
     8.times { trigger_write.write '.' }
-    scheduler.shutdown
   end
   
   # Counts the maximum number of concurrent tasks that have logged to the

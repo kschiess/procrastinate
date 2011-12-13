@@ -20,6 +20,8 @@ describe 'Basic operations:' do
   end
   
   let(:scheduler) { Procrastinate::Scheduler.start }
+  after(:each) { scheduler.shutdown }
+  
   let(:proxy)     { scheduler.proxy(Worker.new) }
 
   describe "Worker writing to a temporary file (orderly shutdown)" do

@@ -107,7 +107,7 @@ class Procrastinate::Scheduler
     manager.wakeup
     # Wait for the manager to finish its work. This waits for child processes
     # and then reaps their result, avoiding zombies. 
-    @thread.join
+    @thread.join if @thread
   end
   
 private
