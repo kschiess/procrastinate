@@ -30,6 +30,17 @@ module Procrastinate
   module_function :proxy
   
   # call-seq: 
+  #   Procrastinate.schedule { some_work }
+  # 
+  # Schedules a block to be executed in its own thread. Returns the future that 
+  # will return the blocks return value. 
+  #
+  def schedule(&block)
+    scheduler.schedule(&block)
+  end
+  module_function :schedule
+  
+  # call-seq: 
   #   Procrastinate.join
   #
   # Waits for all currently scheduled tasks to complete. This is like calling

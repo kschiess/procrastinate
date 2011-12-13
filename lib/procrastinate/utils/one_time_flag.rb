@@ -26,7 +26,9 @@ class Procrastinate::Utils::OneTimeFlag
     
     @waiting_m.synchronize do
       @waiting << Thread.current
-      @waiting_m.sleep(0.001) until set?
+      until set?
+        @waiting_m.sleep(0.001) 
+      end
     end
   end
   
