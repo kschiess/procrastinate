@@ -138,15 +138,18 @@ class Procrastinate::ProcessManager
   # that still needs decoding. 
   #
   def decode_and_handle_message(msg)
-    pid, obj = Marshal.load(msg)
+    pid, obj = begin
+      Marshal.load(msg)
+    rescue => b
+      # Messages that cannot be unmarshalled will be ignored. 
+      warn "Can't unmarshal child communication: #{b}"
+    end
+    
     if child=children[pid]
       child.incoming_message(obj)
     else
       warn "Communication from child #{pid} received, but child is gone."
     end
-  rescue => b
-    # Messages that cannot be unmarshalled will be ignored. 
-    warn "Can't unmarshal child communication."
   end
       
   # Calls completion handlers for all the childs that have now exited.

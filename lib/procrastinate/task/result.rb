@@ -15,7 +15,8 @@ class Procrastinate::Task::Result
   #   *control thread* 
   #
   def incoming_message(obj)
-    return if ready?
+    fail "Read child answer too late, already marked dead." if ready? && @exception
+    fail "Double child answer." if ready?
     
     @value = obj
     @value_ready.set
