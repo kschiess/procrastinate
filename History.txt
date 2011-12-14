@@ -2,6 +2,9 @@
 
   + Schedules blocks as well (Scheduler#schedule).
 
+  ! Fixes a small timing bug that would provoke a ChildDeath where the child
+    exited correctly in reality.
+
 = 0.3.1 / 13Sep2011 
 
   ! fix processor detection for Mac OS X Lion
