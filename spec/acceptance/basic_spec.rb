@@ -20,7 +20,6 @@ describe 'Basic operations:' do
   end
   
   let(:scheduler) { Procrastinate::Scheduler.start }
-  after(:each) { scheduler.shutdown }
   
   let(:proxy)     { scheduler.proxy(Worker.new) }
 
@@ -73,7 +72,8 @@ describe 'Basic operations:' do
     end 
   end
   describe "Worker doing nothing when started many times" do
-    after(:each) { scheduler.shutdown }
+    after(:each) { 
+      timeout(2) { scheduler.shutdown } }
     it "should not exhaust OS resources" do
       100.times do
         proxy.nop

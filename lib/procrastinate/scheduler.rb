@@ -100,7 +100,7 @@ class Procrastinate::Scheduler
   #
   def shutdown(hard=false)
     join unless hard
-    
+
     # Set the flag that will provoke shutdown
     @state = :real_shutdown
     # Wake the manager up, making it check the flag

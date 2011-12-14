@@ -89,8 +89,11 @@ class Procrastinate::ProcessManager
     trap('CHLD', 'DEFAULT')
   end
     
-  # Called from the child management thread, will put that thread to sleep 
+  # Called from the child management thread, will put that thread to sleep
   # until someone requests it to become active again. See #wakeup. 
+  #
+  # This method also depletes the child queue, reading end of processing
+  # messages from all childs and dispatching them to the children. 
   #
   def wait_for_event
     cp_read_end = control_pipe.first
@@ -100,11 +103,10 @@ class Procrastinate::ProcessManager
       
       read_child_messages if ready.include? @cmc_server
 
-      # Kill children here, since we've just depleted the communication
-      # endpoint. This avoids the situation where the child process
-      # communicates but we remove it from our records before it can be told
-      # about it.
-      kill_children
+      # Send the tracking code for the child processes the final notifications
+      # and remove them from the children hash. At this point we know that
+      # no messages are waiting in the child queue.
+      finalize_children
       
       if ready.include? cp_read_end
         # Consume the data (not important)
@@ -112,18 +114,18 @@ class Procrastinate::ProcessManager
         return
       end
     end
-
-  # rescue Errno::EAGAIN, Errno::EINTR
-    # TODO Is this needed?
-    # A signal has been received. Mostly, this is as if we had received
-    # something in the control pipe.
   end
   
-  def kill_children
-    children.delete_if { |pid, child| child.dead? }
+  def finalize_children
+    children.
+      select { |pid, child| child.stopped? }.
+      each { |pid, child| child.finalize }
+      
+    children.delete_if { |pid, child| child.removable? }
   end
 
-  # Once the @cmc_server endpoint is ready, loops and reads all child communication. 
+  # Once the @cmc_server endpoint is ready, loops and reads all child
+  # communication. 
   #
   def read_child_messages
     loop do
@@ -161,7 +163,11 @@ class Procrastinate::ProcessManager
 
       # Trigger the completion callback
       if child=children[child_pid]
-        child.died 
+        child.sigchld_received 
+        # Maybe there are messages queued for this child. If nothing is queued
+        # up, the thread will hang in the select in #wait_for_event unless
+        # we wake it up. 
+        wakeup
       end
     end
   rescue Errno::ECHILD
