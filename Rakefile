@@ -15,8 +15,6 @@ task :stats do
   end
 end
 
-require 'sdoc'
-
 # Generate documentation
 RDoc::Task.new do |rdoc|
   rdoc.title    = "procrastinate - a framework to run tasks in separate processes."

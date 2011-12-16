@@ -4,7 +4,6 @@ gem 'state_machine'
 gem 'rake'
 
 group :development do
-  gem 'sdoc'
   gem "rspec"
   gem 'flexmock'
   
