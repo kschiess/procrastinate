@@ -17,7 +17,8 @@ class Procrastinate::Proxy
   
   def method_missing(name, *args, &block)
     if respond_to? name
-      task = Procrastinate::Task::MethodCall.new(@worker, name, args, block)
+      task = Procrastinate::Task::Callable.new(
+        lambda { @worker.send(name, *args, &block) })
       @scheduler.schedule(task)
       
       return task.result

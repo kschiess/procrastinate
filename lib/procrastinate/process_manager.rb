@@ -120,8 +120,9 @@ class Procrastinate::ProcessManager
     children.
       select { |pid, child| child.stopped? }.
       each { |pid, child| child.finalize }
-      
-    children.delete_if { |pid, child| child.removable? }
+
+    children.delete_if { |pid, child| 
+      child.removable? }
   end
 
   # Once the @cmc_server endpoint is ready, loops and reads all child
@@ -199,11 +200,16 @@ class Procrastinate::ProcessManager
 
       exit! # this seems to be needed to avoid rspecs cleanup tasks
     end
+        
+    # This should never fire: New children are spawned only after we loose 
+    # track of the old ones because they have been successfully processed.
+    fail "PID REUSE!" if children.has_key?(pid)
     
     # The spawning is done in the same thread as the reaping is done. This is 
     # why no race condition to the following line exists. (or in other code, 
     # for that matter.)
-    children[pid] = ChildProcess.new(completion_handler, result).tap { |s| s.start }
+    children[pid] = ChildProcess.new(completion_handler, result).
+      tap { |s| s.start }
   end
   
   # Gets executed in child process to clean up file handles and pipes that the

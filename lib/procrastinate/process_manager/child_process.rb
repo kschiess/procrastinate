@@ -2,7 +2,13 @@
 # a child exits and the object that will handle child-master communication
 # if desired.
 #
-class Procrastinate::ProcessManager::ChildProcess < Struct.new(:handler, :result, :state)
+Procrastinate::ProcessManager::ChildProcess = 
+  Struct.new(:handler, :result, :state) do
+  
+  def initialize(handler, result)
+    super(handler, result, "new")
+  end
+  
   state_machine :state, :initial => :new do
     event(:start)             { transition :new => :running }
     event(:sigchld_received)  { transition :running => :stopped }

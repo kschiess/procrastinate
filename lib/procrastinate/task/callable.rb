@@ -6,8 +6,11 @@ module Procrastinate::Task
   #
   class Callable
     attr_reader :block
+    attr_reader :result
+    
     def initialize(block)
       @b = block
+      @result = Result.new
     end
   
     # Runs this task. Gets passed an endpoint that can be used to communicate
@@ -19,10 +22,6 @@ module Procrastinate::Task
     def run(endpoint)
       r = @b.call
       endpoint.send r if endpoint
-    end
-  
-    def result
-      @result ||= Result.new
     end
   end
 end

@@ -29,7 +29,7 @@ describe Procrastinate::Proxy do
     it "should enqueue work" do
       scheduler.
         should_receive(:schedule).
-        with(Procrastinate::Task::MethodCall).
+        with(Procrastinate::Task::Callable).
         once
       
       proxy.do_work(1,2,3)
