@@ -5,6 +5,9 @@
   ! Fixes a small timing bug that would provoke a ChildDeath where the child
     exited correctly in reality.
 
+  ! Fixes a data race on the result variable. This would have your process
+    hang forever waiting for a result that was already available.
+
 = 0.3.1 / 13Sep2011 
 
   ! fix processor detection for Mac OS X Lion
