@@ -60,6 +60,10 @@ This library runs with at least Ruby 1.8.7 and Ruby 1.9.
 Ruby 1.9-p136 users must use this patch: 
 https://gist.github.com/762807
 
+As a general remark: Interaction with Ruby versions is significant. Please 
+use the latest version available to you, since fork & threading bugs are 
+likely to be fixed there. 
+
 KNOWN BUGS
 
 Due to the way we handle signal traps, you cannot start more than one
