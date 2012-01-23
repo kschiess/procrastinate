@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    procrastinate (0.4.0)
+    procrastinate (0.4.1)
       cod (~> 0.4)
       state_machine (~> 0.9.4)
 

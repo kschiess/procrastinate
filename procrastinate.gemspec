@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{procrastinate}
-  s.version = "0.4.0"
+  s.version = "0.4.1"
 
   s.authors = ["Kaspar Schiess", "Patrick Marchi"]
   s.email = ["kaspar.schiess@absurd.li", "mail@patrickmarchi.ch"]
