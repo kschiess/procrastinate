@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.summary = %q{Framework to run tasks in separate processes.}
 
   s.add_dependency('state_machine', "~> 0.9.4")
-  s.add_dependency('cod')
+  s.add_dependency('cod', '~> 0.4')
   
   s.add_development_dependency('rake')
   s.add_development_dependency('rspec')
