@@ -95,7 +95,9 @@ class Procrastinate::ProcessManager
     cp_read_end = control_pipe.first
     
     loop do # until we have input in the cp_read_end (control_pipe)
-      ready = Cod.select(nil, 
+      # TODO Why does procrastinate (cod) hang sometimes when there is no
+      # timeout here? What messages are we missing?
+      ready = Cod.select(1, 
         :child_msgs => @master, :control_pipe => cp_read_end)
       
       read_child_messages if ready.has_key?(:child_msgs)
@@ -216,9 +218,10 @@ class Procrastinate::ProcessManager
   #
   def wait_for_all_childs
     # TODO Maybe signal KILL to children after some time. 
-    until children.all? { |p, c| c.dead? }
+    until children.empty?
       wait_for_event
       reap_childs
+      finalize_children
     end
   end
 end

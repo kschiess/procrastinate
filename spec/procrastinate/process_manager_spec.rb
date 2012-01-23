@@ -9,12 +9,18 @@ describe Procrastinate::ProcessManager do
   
   its(:process_count) { should == 0}
   
-  # context "when one process is running" do
-  #   class Task 
-  #     def run(endpoint)
-  #       
-  #     end
-  #   end
-  #   before(:each) { subject.create_process() }
-  # end
+  describe '#wait_for_all_childs' do
+    describe 'with a fake child' do
+      let(:child) { Procrastinate::ProcessManager::ChildProcess.new(nil, nil) }
+      before(:each) { manager.children[1234] = child }
+      
+      it "correctly cleans up children" do
+        child.start
+        child.sigchld_received
+        
+        manager.wakeup
+        manager.teardown
+      end 
+    end
+  end
 end
