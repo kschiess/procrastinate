@@ -13,7 +13,12 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.summary = %q{Framework to run tasks in separate processes.}
 
-  s.add_runtime_dependency(%q<state_machine>, ["~> 0.9.4"])
-  s.add_development_dependency(%q<rspec>, [">= 0"])
-  s.add_development_dependency(%q<flexmock>, [">= 0"])
+  s.add_dependency('state_machine', "~> 0.9.4")
+  s.add_dependency('cod')
+  
+  s.add_development_dependency('rake')
+  s.add_development_dependency('rspec')
+  s.add_development_dependency('flexmock')
+  s.add_development_dependency('guard')
+  s.add_development_dependency('growl')
 end

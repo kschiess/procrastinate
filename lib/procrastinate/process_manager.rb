@@ -1,14 +1,12 @@
 
 require 'state_machine'
+require 'cod'
 
 # Dispatches and handles tasks and task completion. Only low level unixy
 # manipulation here, no strategy. The only methods you should call from the
 # outside are #setup, #step, #wakeup and #shutdown. 
 #
 class Procrastinate::ProcessManager
-  include Procrastinate::IPC
-  
-  autoload :ObjectEndpoint, 'procrastinate/process_manager/object_endpoint'
   autoload :ChildProcess,   'procrastinate/process_manager/child_process'
   
   # This pipe is used to wait for events in the master process. 
@@ -25,11 +23,9 @@ class Procrastinate::ProcessManager
     
     # All presently running children
     @children = {}
-    
-    # Child Master Communication (cmc)
-    endpoint = Endpoint.anonymous
-    @cmc_server = endpoint.server
-    @cmc_client = endpoint.client
+
+    # Master should read from @master, Children write to @child
+    @master, @child = Cod.pipe.split
   end
   
   # Sets up resource usage for dispatcher. You must call this before dispatcher
@@ -99,16 +95,17 @@ class Procrastinate::ProcessManager
     cp_read_end = control_pipe.first
     
     loop do # until we have input in the cp_read_end (control_pipe)
-      ready = Endpoint.select([cp_read_end, @cmc_server])
+      ready = Cod.select(nil, 
+        :child_msgs => @master, :control_pipe => cp_read_end)
       
-      read_child_messages if ready.include? @cmc_server
+      read_child_messages if ready.has_key?(:child_msgs)
 
       # Send the tracking code for the child processes the final notifications
       # and remove them from the children hash. At this point we know that
       # no messages are waiting in the child queue.
       finalize_children
       
-      if ready.include? cp_read_end
+      if ready.has_key?(:control_pipe)
         # Consume the data (not important)
         cp_read_end.read_nonblock(1024)
         return
@@ -125,28 +122,20 @@ class Procrastinate::ProcessManager
       child.removable? }
   end
 
-  # Once the @cmc_server endpoint is ready, loops and reads all child
-  # communication. 
-  #
   def read_child_messages
     loop do
-      msg = @cmc_server.receive
-      decode_and_handle_message(msg)
+      ready = Cod.select(0.1, @master)
+      break unless ready
       
-      break unless @cmc_server.waiting?
+      handle_message @master.get
     end
   end
   
   # Called for every message sent from a child. The +msg+ param here is a string
   # that still needs decoding. 
   #
-  def decode_and_handle_message(msg)
-    pid, obj = begin
-      Marshal.load(msg)
-    rescue => b
-      # Messages that cannot be unmarshalled will be ignored. 
-      warn "Can't unmarshal child communication: #{b}"
-    end
+  def handle_message(msg)
+    pid, obj = msg
     
     if child=children[pid]
       child.incoming_message(obj)
@@ -192,7 +181,7 @@ class Procrastinate::ProcessManager
       cleanup
             
       if result
-        endpoint = ObjectEndpoint.new(@cmc_client, Process.pid)
+        endpoint = lambda { |obj| @child.put [Process.pid, obj] }
         task.run(endpoint)
       else
         task.run(nil)

@@ -21,7 +21,7 @@ module Procrastinate::Task
     #
     def run(endpoint)
       r = @b.call
-      endpoint.send r if endpoint
+      endpoint.call(r) if endpoint
     end
   end
 end

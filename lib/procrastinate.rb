@@ -7,7 +7,6 @@ module Procrastinate
   
   autoload :Lock,     'procrastinate/lock'
   autoload :Runtime,  'procrastinate/runtime'
-  autoload :IPC,      'procrastinate/ipc'
   autoload :Task,     'procrastinate/task'
 end
 
