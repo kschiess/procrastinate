@@ -9,10 +9,14 @@ require 'thread'
 # in this class.
 #
 class Procrastinate::Scheduler
+  # Process manager associated with this scheduler
   attr_reader :manager
+  # Schedule strategy associated with this scheduler
   attr_reader :strategy
+  # Task queue
   attr_reader :task_queue
     
+  # @see Scheduler.start
   def initialize(strategy)
     @strategy   = strategy || Procrastinate::SpawnStrategy::Default.new
     @manager = Procrastinate::ProcessManager.new
@@ -24,7 +28,11 @@ class Procrastinate::Scheduler
     @task_queue = Queue.new
   end
   
-  # Starts a new scheduler
+  # Starts a new scheduler.
+  # 
+  # @param strategy [SpawnStrategy] strategy to use when spawning new processes.
+  #   Will default to {SpawnStrategy::Default}.
+  # @return [Scheduler]
   #
   def self.start(strategy=nil)
     new(strategy).
@@ -37,10 +45,12 @@ class Procrastinate::Scheduler
   # Returns a proxy for the +worker+ instance that will allow executing its
   # methods in a new process. 
   #
-  # Example: 
-  #
+  # @example
   #   proxy = scheduler.proxy(worker)
   #   status = proxy.do_some_work    # will execute later and in its own process
+  #
+  # @param worker [Object] Ruby object that executes the work
+  # @return [Proxy]
   #
   def proxy(worker)
     return Procrastinate::Proxy.new(worker, self)
@@ -50,12 +60,24 @@ class Procrastinate::Scheduler
   # used inside task execution processes; If you call it from your main 
   # process, the result is undefined.
   #
+  # @return [Runtime]
+  #
   def runtime
     Procrastinate::Runtime.new
   end
     
   # Called by the proxy to schedule work. You can implement your own Task
   # classes; the relevant interface consists of only a #run method. 
+  #
+  # @overload schedule(task=nil)
+  #   Runs task in its own worker process.
+  #   @param task [#run] task to be run in its own worker process
+  #   @return [Task::Result]
+  #
+  # @overload schedule(&block)
+  #   Executes the Ruby block in its own worker process.
+  #   @param block [Proc] block to be executed in worker process
+  #   @return [Task::Result]
   #
   def schedule(task=nil, &block)
     fail "Shutting down..." if @state != :running

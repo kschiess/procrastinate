@@ -2,7 +2,7 @@
 require 'procrastinate/task/result'
 
 module Procrastinate::Task
-  # Calls the block and returns the result of execution. 
+  # A task that calls the block and returns the result of execution. 
   #
   class Callable
     attr_reader :block
