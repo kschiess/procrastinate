@@ -1,7 +1,7 @@
 require "rubygems"
-require "rdoc/task"
 require 'rspec/core/rake_task'
 require 'rubygems/package_task'
+require 'rake/clean'
 
 desc "Run all tests: Exhaustive."
 RSpec::Core::RakeTask.new
@@ -15,19 +15,14 @@ task :stats do
   end
 end
 
-# Generate documentation
-RDoc::Task.new do |rdoc|
-  rdoc.title    = "procrastinate - a framework to run tasks in separate processes."
-  rdoc.options << '--line-numbers'
-  rdoc.options << '--fmt' << 'shtml' # explictly set shtml generator
-  rdoc.template = 'direct' # lighter template used on railsapi.com
-  rdoc.main = "README"
-  rdoc.rdoc_files.include("README", "lib/**/*.rb")
-  rdoc.rdoc_dir = "rdoc"
+require 'yard'
+YARD::Rake::YardocTask.new do |t|
+  # t.files   = ['lib/**/*.rb']
+  # t.options = ['--any', '--extra', '--opts'] # optional
 end
 
 desc 'Clear out RDoc'
-task :clean => [:clobber_rdoc, :clobber_package]
+task :clean => [:clobber_package]
 
 # This task actually builds the gem. 
 task :gem => :spec
@@ -37,3 +32,5 @@ desc "Generate the gem package."
 Gem::PackageTask.new(spec) do |pkg|
   # pkg.need_tar = true
 end
+
+CLEAN << 'doc'

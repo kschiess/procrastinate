@@ -21,4 +21,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency('flexmock')
   s.add_development_dependency('guard')
   s.add_development_dependency('growl')
+  s.add_development_dependency('yard')
 end
