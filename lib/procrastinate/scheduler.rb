@@ -3,10 +3,31 @@ require 'thread'
 
 # API Frontend for the procrastinate library. Allows scheduling of tasks and
 # workers in seperate processes and provides minimal locking primitives. 
+# 
+# == Synopsis
+#   scheduler = Procrastinate::Scheduler.start
+#   
+# Schedule a block to run in its own process:
+#   result = scheduler.schedule { Process.pid }
+#   result.value  # => child process pid
 #
-# Each scheduler owns its own thread that does all the processing. The
-# interface between your main thread and the procrastinate thread is defined
-# in this class.
+# Or schedule a message call to an object to be run in another process: 
+#   proxy = scheduler.proxy(1)
+#   result = proxy + 2
+#   result.value  # => 3
+#   
+# You can ask the result value if it is ready yet: 
+#   result.ready? # true/false
+#
+# Stop the scheduler, waiting for all scheduled work to finish:
+#   scheduler.shutdown 
+# 
+# Or shutting down hard, doesn't wait for work to finish: 
+#   scheduler.shutting(true)
+#
+# @note Each scheduler owns its own thread that does all the processing. The
+#   interface between your main thread and the procrastinate thread is defined
+#   in this class.
 #
 class Procrastinate::Scheduler
   # Process manager associated with this scheduler
@@ -14,7 +35,7 @@ class Procrastinate::Scheduler
   # Schedule strategy associated with this scheduler
   attr_reader :strategy
   # Task queue
-  attr_reader :task_queue
+  attr_reader :task_producer
     
   # @see Scheduler.start
   def initialize(strategy)
@@ -24,8 +45,11 @@ class Procrastinate::Scheduler
     # State takes three values: :running, :soft_shutdown, :real_shutdown
     # :soft_shutdown will not accept any new tasks and wait for completion
     # :real_shutdown will stop as soon as possible (still closing down nicely)
-    @state      = :running
-    @task_queue = Queue.new
+    @state          = :running
+    
+    # If we're used in server mode, this will be replaced with a task producer
+    # that produces new worker processes.
+    @task_producer  = Queue.new
   end
   
   # Starts a new scheduler.
@@ -89,7 +113,7 @@ class Procrastinate::Scheduler
       task = Procrastinate::Task::Callable.new(block)
     end
     
-    task_queue << task
+    task_producer << task
     
     # Create an occasion for spawning
     manager.wakeup
@@ -109,7 +133,7 @@ class Procrastinate::Scheduler
     # Wait until all tasks are done.
     loop do
       manager.wakeup
-      break if task_queue.empty? && manager.process_count==0
+      break if task_producer.empty? && manager.process_count==0
       sleep 0.01
     end
     
@@ -137,8 +161,8 @@ private
   #   *control thread* 
   #
   def spawn
-    while strategy.should_spawn? && !task_queue.empty?
-      task = task_queue.pop
+    while strategy.should_spawn? && !task_producer.empty?
+      task = task_producer.pop
       strategy.notify_spawn
       manager.create_process(task) do
         strategy.notify_dead
