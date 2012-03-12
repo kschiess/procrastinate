@@ -73,7 +73,7 @@ describe 'Basic operations:' do
   end
   describe "Worker doing nothing when started many times" do
     after(:each) { 
-      timeout(2) { scheduler.shutdown } }
+      timeout(5) { scheduler.shutdown } }
     it "should not exhaust OS resources" do
       100.times do
         proxy.nop
