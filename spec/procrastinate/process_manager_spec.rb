@@ -14,7 +14,7 @@ describe Procrastinate::ProcessManager do
       let(:child) { Procrastinate::ProcessManager::ChildProcess.new(nil, nil) }
       before(:each) { manager.children[1234] = child }
       
-      it "correctly cleans up children" do
+      it "regression: correctly cleans up children" do
         child.start
         child.sigchld_received
         

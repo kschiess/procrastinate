@@ -166,13 +166,18 @@ class Procrastinate::ProcessManager
     # Ignore: This means that no childs remain. 
   end
   
-  # Spawns a process to work on +task+. If a block is given, it is called
-  # when the task completes. This method should only be called from a strategy
+  # Spawns a process to work on +task+. If a block is given, it is called when
+  # the task completes. This method should only be called from a strategy
   # inside the dispatchers thread. Otherwise it will expose threading issues. 
   #
-  # Example: 
-  # 
-  #   spawn(wi) { |pid| puts "Task is complete" }
+  # @example 
+  #   create_process(wi) { puts "Task is complete" }
+  #
+  # @param task [Procrastinate::Task::Callable] task to be run inside the
+  #   forked process
+  # @param completion_handler [Proc] completion handler that is called when
+  #   the process exits
+  # @return [void]
   #
   def create_process(task, &completion_handler)
     # Tasks that are interested in getting messages from their childs must 
@@ -222,6 +227,16 @@ class Procrastinate::ProcessManager
       wait_for_event
       reap_childs
       finalize_children
+    end
+  end
+
+  # Kills all running processes by sending them a QUIT signal. 
+  #
+  # @param signal [String] signal to send to the forked processes.
+  #
+  def kill_processes(signal='QUIT')
+    children.each do |pid, process|
+      Process.kill(signal, pid)
     end
   end
 end
