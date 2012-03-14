@@ -5,12 +5,13 @@ module Procrastinate
       @state    = :new
     end
     
-    def start(n, &block)
+    def start(n, activity_check_interval=nil, &block)
       fail "Already running server." unless @state == :new
       
       @block    = block
       @strategy = Procrastinate::SpawnStrategy::Throttled.new(n)
       @state    = :running
+      @check_interval = activity_check_interval
       
       start_thread
     end
