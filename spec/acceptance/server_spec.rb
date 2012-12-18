@@ -52,6 +52,6 @@ describe "Server mode (#spawn_workers)" do
     rescue Timeout::Error
     end
     
-    pids.size.should >= 2*n
+    pids.size.should >= n
   end 
 end
