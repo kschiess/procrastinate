@@ -1,6 +1,7 @@
-= 0.4.1 / 23Jan2012
+= 0.5 / last minor release: 18Dez2012
 
   + Replaces the custom IPC implementation with the cod gem.
+  * Maintenance release to be able to use modern gems. 
 
 = 0.4.0 / 16Dez2011
 

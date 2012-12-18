@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{procrastinate}
-  s.version = "0.4.1"
+  s.version = "0.5"
 
   s.authors = ["Kaspar Schiess", "Patrick Marchi"]
   s.email = ["kaspar.schiess@absurd.li", "mail@patrickmarchi.ch"]
@@ -13,8 +13,8 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.summary = %q{Framework to run tasks in separate processes.}
 
-  s.add_dependency('state_machine', "~> 0.9.4")
-  s.add_dependency('cod', '~> 0.4')
+  s.add_dependency('state_machine', '~> 1.1')
+  s.add_dependency('cod', '~> 0.5')
   
   s.add_development_dependency('rake')
   s.add_development_dependency('rspec')
