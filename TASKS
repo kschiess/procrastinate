@@ -1,0 +1,5 @@
+Here's a list of things that you can do in this project: 
+
+rspec                             Runs all the tests
+gem build procrastinate.gemspec   Builds the gem. 
+
