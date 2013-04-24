@@ -17,6 +17,9 @@ describe 'Basic operations:' do
     def the_answer
       42
     end
+    def large_answer
+      " "*64*1024
+    end
   end
   
   let(:scheduler) { Procrastinate::Scheduler.start }
@@ -89,5 +92,14 @@ describe 'Basic operations:' do
       before(:each) { subject.value }
       its(:ready?) { should == true }
     end
+  end
+  describe "Worker#large_answer return value" do
+    let(:results) { 10.times.map { proxy.large_answer } }
+    after(:each) { scheduler.shutdown }
+
+    it "should return all good answers" do
+      results.
+        map(&:value).map(&:size).should == [64*1024] * 10
+    end 
   end
 end
