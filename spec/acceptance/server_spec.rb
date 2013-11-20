@@ -4,7 +4,7 @@ describe "Server mode (#spawn_workers)" do
   let(:server) { Procrastinate::Server.new }
   after(:each) { server.shutdown }
   
-  let(:pipe) { IO.pipe.tap { |p| 
+  let!(:pipe) { IO.pipe.tap { |p| 
     class << p 
       alias read first
       alias write last
