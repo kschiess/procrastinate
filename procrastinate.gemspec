@@ -4,6 +4,7 @@ Gem::Specification.new do |s|
   s.name = %q{procrastinate}
   s.version = "0.6.0"
 
+  s.license = 'MIT'
   s.authors = ["Kaspar Schiess", "Patrick Marchi"]
   s.email = ["kaspar.schiess@absurd.li", "mail@patrickmarchi.ch"]
   s.extra_rdoc_files = ["README"]
