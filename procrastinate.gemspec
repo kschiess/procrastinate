@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors = ["Kaspar Schiess", "Patrick Marchi"]
   s.email = ["kaspar.schiess@absurd.li", "mail@patrickmarchi.ch"]
   s.extra_rdoc_files = ["README"]
-  s.files = %w(HISTORY.txt LICENSE Rakefile README) + Dir.glob("{lib,examples}/**/*")
+  s.files = %w(HISTORY.txt LICENSE README) + Dir.glob("{lib,examples}/**/*")
   s.homepage = %q{http://github.com/kschiess/procrastinate}
   s.rdoc_options = ["--main", "README"]
   s.require_paths = ["lib"]
