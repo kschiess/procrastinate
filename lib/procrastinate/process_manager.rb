@@ -1,6 +1,5 @@
 
 require 'state_machine'
-require 'cod'
 
 # Dispatches and handles tasks and task completion. Only low level unixy
 # manipulation here, no strategy. The only methods you should call from the
@@ -23,9 +22,6 @@ class Procrastinate::ProcessManager
     
     # All presently running children
     @children = {}
-
-    # Master should read from @master, Children write to @child
-    @master, @child = Cod.pipe.split
   end
   
   # Sets up resource usage for dispatcher. You must call this before dispatcher
@@ -95,21 +91,31 @@ class Procrastinate::ProcessManager
     cp_read_end = control_pipe.first
     
     loop do # until we have input in the cp_read_end (control_pipe)
-      # TODO Why does procrastinate (cod) hang sometimes when there is no
-      # timeout here? What messages are we missing?
-      ready = Cod.select(1, 
-        :child_msgs => @master, :control_pipe => cp_read_end)
-      
-      read_child_messages if ready.has_key?(:child_msgs)
+      io_map = children.inject({}) { |map, (_, child)|
+        map[child.master_pipe] = child; map }
 
+      ready, _, _ = IO.select(io_map.keys + [cp_read_end], [], [], 0.1)
+      next unless ready
+
+      # Process all messages that were sent from our childs to us. 
+      ready.each { |io| 
+        next if io == cp_read_end
+
+        child = io_map[io]
+
+        fail "Assert: All IOs correspond to a child" unless child
+        child.read_message 
+      }
+           
       # Send the tracking code for the child processes the final notifications
       # and remove them from the children hash. At this point we know that
       # no messages are waiting in the child queue.
       finalize_children
       
-      if ready.has_key?(:control_pipe)
+      if ready.include?(cp_read_end)
         # Consume the data (not important)
         cp_read_end.read_nonblock(1024)
+        # And return to our caller. This is the event we've been waiting for. 
         return
       end
     end
@@ -124,28 +130,6 @@ class Procrastinate::ProcessManager
       child.removable? }
   end
 
-  def read_child_messages
-    loop do
-      ready = Cod.select(0.1, @master)
-      break unless ready
-      
-      handle_message @master.get
-    end
-  end
-  
-  # Called for every message sent from a child. The +msg+ param here is a string
-  # that still needs decoding. 
-  #
-  def handle_message(msg)
-    pid, obj = msg
-    
-    if child=children[pid]
-      child.incoming_message(obj)
-    else
-      warn "Communication from child #{pid} received, but child is gone."
-    end
-  end
-      
   # Calls completion handlers for all the childs that have now exited.
   #     
   def reap_childs
@@ -183,12 +167,13 @@ class Procrastinate::ProcessManager
     # Tasks that are interested in getting messages from their childs must 
     # provide a result object that handles incoming 'result' messages.
     result = task.result
+    child_process = ChildProcess.new(completion_handler, result)
     
     pid = fork do
       cleanup
             
       if result
-        endpoint = lambda { |obj| @child.put [Process.pid, obj] }
+        endpoint = lambda { |obj| child_process.send_message(obj) }
         task.run(endpoint)
       else
         task.run(nil)
@@ -204,8 +189,7 @@ class Procrastinate::ProcessManager
     # The spawning is done in the same thread as the reaping is done. This is 
     # why no race condition to the following line exists. (or in other code, 
     # for that matter.)
-    children[pid] = ChildProcess.new(completion_handler, result).
-      tap { |s| s.start }
+    children[pid] = child_process.tap { |s| s.start }
   end
   
   # Gets executed in child process to clean up file handles and pipes that the

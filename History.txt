@@ -1,3 +1,9 @@
+= 0.6 / 20Nov2013
+
+  - Removes the cod gem and replaces it with a correct parent child
+    communication.
+  - Makes sure this works with Ruby 2.0
+
 = 0.5 / last minor release: 18Dez2012
 
   + Replaces the custom IPC implementation with the cod gem.

@@ -4,9 +4,13 @@
 #
 Procrastinate::ProcessManager::ChildProcess = 
   Struct.new(:handler, :result, :state) do
+
+  attr_reader :master_pipe, :child_pipe
   
   def initialize(handler, result)
     super(handler, result, "new")
+
+    @master_pipe, @child_pipe = IO.pipe
   end
   
   state_machine :state, :initial => :new do
@@ -33,11 +37,28 @@ Procrastinate::ProcessManager::ChildProcess =
   #
   def notify_result
     result.process_died if result
+
+    # The child is now officially dead, so we don't need these anymore: 
+    @master_pipe.close
+    @child_pipe.close
   end
       
   # Handles incoming messages from the tasks process.
   #
   def incoming_message(obj)
     result.incoming_message(obj) if result
+  end
+
+  # Read and process a message from the process that is connected to this 
+  # object. Normally, we would make sure that such a message is indeed waiting
+  # on the master_pipe by means of an IO select. 
+  #
+  def read_message
+    msg = Marshal.load(master_pipe)
+    incoming_message(msg)
+  end
+
+  def send_message obj
+    Marshal.dump(obj, child_pipe)
   end
 end

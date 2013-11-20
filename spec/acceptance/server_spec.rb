@@ -4,26 +4,36 @@ describe "Server mode (#spawn_workers)" do
   let(:server) { Procrastinate::Server.new }
   after(:each) { server.shutdown }
   
-  let(:pipe) { Cod.pipe.split }
-  after(:each) { pipe.read.close; pipe.write.close; }
+  let(:pipe) { IO.pipe.tap { |p| 
+    class << p 
+      alias read first
+      alias write last
+    end
+  } }
   let(:n) { 5 }
-  
+
+  def read_token
+    Marshal.load(pipe.read)
+  end
   def read_tokens(n)
-    n.times.map { pipe.read.get }
+    n.times.map { read_token }
+  end
+  def write_token token
+    Marshal.dump(token, pipe.write)
   end
 
   it "spawns n workers" do
     server.start(n) {
-      pipe.write.put Process.pid
+      write_token Process.pid
       sleep 10
     }
     
-    collected_worker_pids = n.times.map { pipe.read.get }.compact
+    collected_worker_pids = read_tokens(n).compact
     collected_worker_pids.should have(n).pids_stored_in_it
   end 
   it "respawns workers until there are n workers again" do
     server.start(n) {
-      pipe.write.put Process.pid
+      write_token Process.pid
       sleep 10
     }
     
@@ -38,7 +48,7 @@ describe "Server mode (#spawn_workers)" do
   end 
   it "checks activity around the loop, killing processes if they are lazy" do
     server.start(n, 0.1) { |dead_man_switch| 
-      pipe.write.put Process.pid
+      write_token Process.pid
       loop do
         sleep 0.1
       end }
@@ -48,7 +58,7 @@ describe "Server mode (#spawn_workers)" do
     # we should roughly read 2*n pids.
     pids = []
     begin
-      timeout(0.2) { loop { pids << pipe.read.get } }
+      timeout(0.2) { loop { pids << read_token } }
     rescue Timeout::Error
     end
     
